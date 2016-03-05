@@ -1,16 +1,12 @@
 'use strict';
 
-module.exports = {
-  validate: (type, value) => {
-    if (value === null || value === undefined) return false;
-    switch (type) {
-      case 'String':
-        return !require('./isOnlyLetters')(value);
-        break;
-      default:
-        return false;
-        break;
-    }
-    return true;
+module.exports = (type) => {
+  switch (type) {
+    case 'String':
+      return !require('./notEmptyString');
+      break;
+    default:
+      return require('./notEmptyBASE');
+      break;
   }
 };

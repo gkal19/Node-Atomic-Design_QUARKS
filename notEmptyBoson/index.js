@@ -1,12 +1,12 @@
 'use strict';
 
 // const assert = require('assert');
-const notEmpty = require('./notEmpty');
+const notEmpty = require('./notEmpty')('bla');
 
 const valueTRUE = 'suissa';
-const valueFALSE = '';
+const valueFALSE = null;
 
-console.log(valueTRUE + ' notEmpty?', notEmpty.validate('String', valueTRUE));
-console.log(valueFALSE + ' notEmpty?', notEmpty.validate('String', valueFALSE));
+console.log(valueTRUE + ' notEmpty?', notEmpty.validate(valueTRUE));
+console.log(valueFALSE + ' notEmpty?', notEmpty.validate(valueFALSE));
 
 // assert.ok(value, message)
