@@ -86,7 +86,7 @@ module.exports = (value) => {
 // isOnlyLetters
 'use strict';
 
-module.exports = (value) => { return value.match(/[a-zA-Z]+/g) };
+module.exports = (value) => /[a-zA-Z]+/g.test(value);
 ```
 
 Dessa forma podemos criar Quarks mais complexos apenas agregando Quarks menores.
