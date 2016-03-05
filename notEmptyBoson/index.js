@@ -1,7 +1,13 @@
 'use strict';
 
 // const assert = require('assert');
-const notEmpty = require('./notEmpty')('bla');
+const validations = ['notEmptyString', 'notEmptyBASE'];
+const notEmpty = require('./boson')(validations);
+// console.log('quarks antes', notEmpty.quarks.length);
+
+// notEmpty.quarks.forEach( function(element, index) {
+//   console.log('quarks', element);
+// });
 
 const valueTRUE = 'suissa';
 const valueFALSE = null;

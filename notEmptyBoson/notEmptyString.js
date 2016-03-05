@@ -2,7 +2,7 @@
 
 module.exports = {
   validate: (value) => {
-    if (value === null || value === undefined) return false;
-    return true;
+    console.log('notEmptyString: ', value);
+    if (!value.match(/[a-zA-Z]+/g)) return false;
   }
 };
