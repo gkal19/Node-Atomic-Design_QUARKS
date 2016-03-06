@@ -2,7 +2,7 @@
 
 module.exports = (value) => {
   // validação base
-  let validated = require('./isEmpty')(value)
+  let validated = require('../isEmpty')(value)
   if (validated) return false;
   // validação se é Number
   // validação se maior que 0
