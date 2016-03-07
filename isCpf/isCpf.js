@@ -1,13 +1,12 @@
+'use strict';
 
 module.exports = (value) => {
 
-	const soma;
-	const resto;
-
-	soma = 0;
+	let soma = 0;
+	let resto = undefined;
 	if(value == '00000000000') return false;
 
-	for(n = 1; n<=9; n++) {
+	for(var n = 1; n<=9; n++) {
 		soma = soma + parseInt(value.substring(n - 1 , n)) * (11 - n);
 	}
 
