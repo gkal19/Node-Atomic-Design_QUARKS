@@ -3,10 +3,15 @@
 const regex = /^[0-9]{8}$/;
 
 module.exports = (value) => {
-    value = value.replace(/\.|\-/g, '');    
-    const isEmpty = require('../isEmpty/isEmpty')(value);       
+  const isEmpty = require('../isEmpty/isEmptyString/isEmptyString')(value);  
+  const isString = require('../isString/isString')(value);  
+  console.log('isEmpty', isEmpty);
+  if(!isEmpty) {
+    console.log(value);
+    value = value.replace(/\.|\-/g, '');     
     const isCep = regex.test(value);
-    if(isEmpty || !isCep) return false;
-    
-    return true;         
+    if(isCep) return true;  
+  }
+      
+  return false;         
 }
