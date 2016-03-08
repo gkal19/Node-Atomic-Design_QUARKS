@@ -1,0 +1,30 @@
+{
+  "name": "node-atomic-design-quarks",
+  "version": "1.0.0",
+  "description": "Quarks do Atomic Design",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Webschool-io/Node-Atomic-Design_QUARKS.git"
+  },
+  "keywords": [
+    "atomic",
+    "design",
+    "node.js",
+    "mongoose",
+    "functional",
+    "quarks"
+  ],
+  "author": "Suissa",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/Webschool-io/Node-Atomic-Design_QUARKS/issues"
+  },
+  "homepage": "https://github.com/Webschool-io/Node-Atomic-Design_QUARKS#readme",
+  "dependencies": {
+    "chai": "^3.5.0"
+  }
+}

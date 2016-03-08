@@ -284,3 +284,158 @@ Depois deles podemos listar alguns Quarks específicos para campos:
   + isAddressCountry
 
 Todos eles usarão os Quarks base internamente.
+
+## TDD
+
+Como devemos testar nossos Quarks?
+
+Para isso vamos utiliar o Chai com `expect` que foi ensinado [na aula 9](https://www.youtube.com/watch?v=OCB7jMZBIas).
+
+Vamos entender como escrever 1 teste com ele:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+const valueTRUE = 'Suissa';
+const valueFALSE = 1;
+
+describe('isString', function() {
+  describe('é String',  () => {
+    it('testando: "'+valueTRUE+'"', () => {
+      expect(require('./isString')(valueTRUE)).to.equal(true);
+    });
+  });
+  describe('não é String',  () => {
+    it('testando: "'+valueFALSE+'"', () => {
+      expect(require('./isString')(valueFALSE)).to.equal(false);
+    });
+  });
+});
+```
+
+Então basicamente separamos nossos testes em 2:
+
+- validado: 'é String'
+- não validado: 'não é String'
+
+```js
+describe('é String',  () => {
+  it('testando: "'+valueTRUE+'"', () => {
+    expect(require('./isString')(valueTRUE)).to.equal(true);
+  });
+});
+describe('não é String',  () => {
+  it('testando: "'+valueFALSE+'"', () => {
+    expect(require('./isString')(valueFALSE)).to.equal(false);
+  });
+});
+```
+
+Para rodar esse teste basta executar:
+
+```
+mocha isString/isString.test.js
+
+
+  isString
+    é String
+      ✓ testando: "Suissa"
+    não é String
+      ✓ testando: "1"
+
+
+  2 passing (26ms)
+```
+
+Pronto ele não teve erros pois validamos nossos testes corretamente, porém testamos apenas com 1 valor e isso é ridículo né?
+
+Então vamos agora criar um teste que valide vários valores, para fazer isso iniciamos colocando os valores verdadeiros e falsos em *arrays*:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+const valuesTRUE = ['Suissa', '1', '', ' '];
+const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
+```
+
+Certo? Então definimos em `valuesTRUE` todos os valores possíveis que devem ser aceitos como *String* e em `valuesFALSE` todos os valores que não podem ser *String*.
+
+Agora criamos a estrutura para os 2 testes:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+const valuesTRUE = ['Suissa', '1', '', ' '];
+const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
+
+describe('isString', function() {
+  describe('é String',  () => {
+  });
+  describe('não é String',  () => {
+  });
+});
+```
+
+Bem simples não? Então basta fazer o que?
+
+Criar uma função que itere sobre os valores do *array* e vá executando o `it` que é a função que irá testar realmente os valores:
+
+```js
+it('testando: "'+valueTRUE+'"', () => {
+  expect(require('./isString')(valueTRUE)).to.equal(true);
+});
+```
+
+Bom então sabemos que precisamos fazer 1 `it` para cada valor do *array* e obviamente não faremos isso manualmente, correto?
+
+**Então como faremos?**
+
+> forEach
+
+**Mas como?**
+
+Dessa forma:
+
+```js
+valuesTRUE.forEach( function(element, index) {
+  it('testando: "'+element+'"',  () => {
+    expect(require('./isString')(element)).to.equal(true);
+  });
+});
+```
+
+Percebeu que ele irá criar 1 `it` dinamicamente para cada item do *array* `valuesTRUE`?
+
+Agora basta juntarmos tudo para ficar assim:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+const valuesTRUE = ['Suissa', '1', '', ' '];
+const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
+
+describe('isString', function() {
+  describe('é String',  () => {
+    valuesTRUE.forEach( function(element, index) {
+      it('testando: "'+element+'"',  () => {
+        expect(require('./isString')(element)).to.equal(true);
+      });
+    });
+  });
+  describe('não é String',  () => {
+    valuesFALSE.forEach( function(element, index) {
+      it('testando: "'+element+'"',  () => {
+        expect(require('./isString')(element)).to.equal(false);
+      });
+    });
+  });
+});
+```
+
