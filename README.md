@@ -909,3 +909,277 @@ require('./testModule')('isString', describes);
 
 Que bom pois esse é o nosso padrão para testes!
 
+Agora chegamos a um impasse, sabe porquê?
+
+### Testes diferentes
+
+Sim imagine que nossa função a ser testada não receba apenas 1 valor, mas sim 2!
+
+Vou pegar um exemplo nosso, o `isEnum`.
+
+```js
+'use strict';
+
+module.exports = (value, list) => {
+
+  const isEnum = require('./createIsEnum')(list)
+
+  const validated = isEnum(value);
+  if (validated) return true;
+
+  return false;
+};
+```
+
+> Por que o isEnum recebe 2 valores e não apenas 1 como os outros?
+
+Bom é bem simples, primeiro você precisa entender o que é o `ENUM`.
+
+Ele é basicamente uma lista de valores onde para um valor ser aceito ele **precisa obrigatoriamente** existir nessa lista.
+
+Ou seja, para testarmos essa funcionalidade precisamos passar o valor a ser testado e a lista de valores aceitáveis, correto?
+
+Vamos ver então como usamos esse módulo:
+
+```js
+const assert = require('assert');
+
+const list = ['suissa', 'itacir'];
+const valueTRUE = 'suissa';
+const valueFALSE = 'pitchulo';
+
+assert.equal(true, require('./isEnum')(valueTRUE, list));
+assert.equal(false, require('./isEnum')(valueFALSE, list));
+```
+
+Agora levando para o nosso conceito mais genérico precisamos nos ater ao segundo parâmetro `list` e pensar então como podemos passar esses valores na forma que aprendemos.
+
+Podemos fazer o seguinte, adicionar o `list` no nosso *array* `describes`:
+
+```js
+'use strict';
+
+const describes = [
+  { list: ['suissa', 'itacir'] }
+, { type: true
+  , message: 'é ENUM'
+  , values: ['suissa', 'itacir']
+  }
+, { type: false
+  , message: 'não é ENUM'
+  , values: [null, undefined, 1, true, {}, ()=>{}]
+  }
+];
+require('./testModuleCreate')('isEnum', describes);
+```
+
+Perceba que estou usando um módulo diferente, o `testModuleCreate`, pois precisaremos modificar o nosso `testModule` e para não dar merda preferi criar um novo.
+
+A primeira coisa que devemos fazer é a lógica do `list`:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+module.exports = (testName, describes) => {
+
+  const list = describes.splice(0,1);
+};
+```
+
+O que fizemos ali em cima foi retirar o primeiro elemento do *array* `describes` que é onde está nosso `list`, porém olhe só o resultado de `describes.splice(0,1)`:
+
+```js
+[ { list: [ 'suissa', 'itacir' ] } ]
+```
+
+Isso acontece porque o `splice` nos retorna um *array* com os elementos retirados, então vamos ajeitar essa função para pegar apenas:
+
+```js
+[ 'suissa', 'itacir' ]
+```
+
+Você já deve ter imaginado como né? Isso mesmo assim:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+module.exports = (testName, describes) => {
+
+  const list = describes.splice(0,1)[0].list;
+};
+```
+
+Onde `describes.splice(0,1)[0]` irá pegar o primeiro elemento do *array* retornado e depois acessamos a propriedade `list` com `describes.splice(0,1)[0].list`.
+
+Beleza após isso precisamos modificar apenas o `require` do módulo pois precisamos adicionar o parâmetro `list` dessa forma:
+
+```js
+const list = describes.splice(0,1)[0].list;
+const test = (values, valueToTest) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./../'+testName+'/'+testName)(element, list)).to.equal(valueToTest);
+    });
+  });
+};
+```
+
+Ou seja, modificamos apenas essas partes para que o módulo aceite um tipo de teste diferente, ficando assim:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+module.exports = (testName, describes) => {
+
+  const list = describes.splice(0,1)[0].list;
+  const test = (values, valueToTest) => {
+    values.forEach( (element) => {
+      it('testando: '+element,  () => {
+        let validated = require('./../'+testName+'/'+testName)(element, list);
+        expect(validated).to.equal(valueToTest);
+      });
+    });
+  };
+
+  describe(testName, () => {
+    describes.forEach( (element, index) => {
+      if(element.type) {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+      else {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+      if(element.list) return true;
+    });
+  });
+};
+
+```
+
+Bom você com certeza deve se perguntar:
+
+> Bah teve que criar outro módulo só por causa dessa modificação?
+
+Teve apenas para facilitar nossa visualização do padrão, você já percebeu qual é?
+
+**Simples!**
+
+Em um módulo ele não trabalha com o `list` e no outro trabalha, então precisamos criar uma lógica para que possamos trabalhar com apenas 1 módulo.
+
+**Basta fazer o que?**
+
+Vamos inciar com um simples `if/else`:
+
+```js
+let test = () => {};
+
+if(describes[0].list) {
+  const list = describes.splice(0,1)[0].list;
+  test = (values, valueToTest) => {
+    values.forEach( (element) => {
+      it('testando: '+element,  () => {
+        let validated = require('./../'+testName+'/'+testName)(element, list);
+        expect(validated).to.equal(valueToTest);
+      });
+    });
+  };
+}
+else {
+  test = (values, valueToTest) => {
+    values.forEach( (element) => {
+      it('testando: '+element,  () => {
+        let validated = require('./../'+testName+'/'+testName)(element);
+        expect(validated).to.equal(valueToTest);
+      });
+    });
+  };
+}
+```
+
+Porém não precisamos desse `else`, consegue ver como ficará?
+
+Assim:
+
+```js
+let test = (values, valueToTest) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      let validated = require('./../'+testName+'/'+testName)(element);
+      expect(validated).to.equal(valueToTest);
+    });
+  });
+};
+
+if(describes[0].list) {
+  const list = describes.splice(0,1)[0].list;
+  test = (values, valueToTest) => {
+    values.forEach( (element) => {
+      it('testando: '+element,  () => {
+        let validated = require('./../'+testName+'/'+testName)(element, list);
+        expect(validated).to.equal(valueToTest);
+      });
+    });
+  };
+}
+```
+
+**Entendeu o porquê retiramos o `else`?**
+
+Porque definimos a função `test` com o seu padrão no início e depois só sobrescrevemos ela caso o `describes` possua `list` no nosso padrão de objeto.
+
+Pronto com isso finalizamos esse módulo genérico de testes para nossos Quarks.
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+module.exports = (testName, describes) => {
+  let test = (values, valueToTest) => {
+    values.forEach( (element) => {
+      it('testando: '+element,  () => {
+        let validated = require('./../'+testName+'/'+testName)(element);
+        expect(validated).to.equal(valueToTest);
+      });
+    });
+  };
+  if(describes[0].list) {
+    const list = describes.splice(0,1)[0].list;
+    test = (values, valueToTest) => {
+      values.forEach( (element) => {
+        it('testando: '+element,  () => {
+          let validated = require('./../'+testName+'/'+testName)(element, list);
+          expect(validated).to.equal(valueToTest);
+        });
+      });
+    };
+  }
+
+  describe(testName, () => {
+    describes.forEach( (element, index) => {
+      if(element.type) {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+      else {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+      if(element.list) return true;
+    });
+  });
+};
+
+```

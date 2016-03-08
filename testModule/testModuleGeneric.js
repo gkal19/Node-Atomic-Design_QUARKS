@@ -3,16 +3,25 @@
 const expect = require('chai').expect;
 
 module.exports = (testName, describes) => {
-
-  const list = describes.splice(0,1)[0].list;
-  const test = (values, valueToTest) => {
+  let test = (values, valueToTest) => {
     values.forEach( (element) => {
       it('testando: '+element,  () => {
-        let validated = require('./../'+testName+'/'+testName)(element, list);
+        let validated = require('./../'+testName+'/'+testName)(element);
         expect(validated).to.equal(valueToTest);
       });
     });
   };
+  if(describes[0].list) {
+    const list = describes.splice(0,1)[0].list;
+    test = (values, valueToTest) => {
+      values.forEach( (element) => {
+        it('testando: '+element,  () => {
+          let validated = require('./../'+testName+'/'+testName)(element, list);
+          expect(validated).to.equal(valueToTest);
+        });
+      });
+    };
+  }
 
   describe(testName, () => {
     describes.forEach( (element, index) => {
