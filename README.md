@@ -300,7 +300,7 @@ const expect = require('chai').expect;
 const valueTRUE = 'Suissa';
 const valueFALSE = 1;
 
-describe('isString', function() {
+describe('isString', () => {
   describe('é String',  () => {
     it('testando: "'+valueTRUE+'"', () => {
       expect(require('./isString')(valueTRUE)).to.equal(true);
@@ -373,7 +373,7 @@ const expect = require('chai').expect;
 const valuesTRUE = ['Suissa', '1', '', ' '];
 const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
 
-describe('isString', function() {
+describe('isString', () => {
   describe('é String',  () => {
   });
   describe('não é String',  () => {
@@ -421,7 +421,7 @@ const expect = require('chai').expect;
 const valuesTRUE = ['Suissa', '1', '', ' '];
 const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
 
-describe('isString', function() {
+describe('isString', () => {
   describe('é String',  () => {
     valuesTRUE.forEach( function(element, index) {
       it('testando: '+element,  () => {
@@ -430,7 +430,7 @@ describe('isString', function() {
     });
   });
   describe('não é String',  () => {
-    valuesFALSE.forEach( function(element, index) {
+    valuesFALSE.forEach( (element, index) => {
       it('testando: '+element,  () => {
         expect(require('./isString')(element)).to.equal(false);
       });
@@ -462,4 +462,129 @@ mocha isString/isString.test.js
 
   10 passing (28ms)
 ```
+
+Mas é óbvio que ainda podemos melhorar esse código refatorando-o, acompanhe comigo pois iremos separar as funções de teste dos `describe`s:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+const valuesTRUE = ['Suissa', '1', '', ' '];
+const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
+
+const testTRUE = (values) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./isString')(element)).to.equal(true);
+    });
+  });
+};
+
+const testFALSE = (values) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./isString')(element)).to.equal(false);
+    });
+  });
+};
+
+describe('isString', () => {
+  describe('é String',  () => testTRUE(valuesTRUE));
+  describe('não é String',  () => testFALSE(valuesFALSE));
+});
+```
+
+**OK! Mas para que isso?**
+
+> Ahhhhhhhh! Você ainda não notou o padrão?
+
+Perceba essas duas funções: `testTRUE` e `testFALSE`.
+
+Conseguiu ver o padrão agora?
+
+> Ainda não? Então vamos analisar!
+
+```js
+const testTRUE = (values) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./isString')(element)).to.equal(true);
+    });
+  });
+};
+
+const testFALSE = (values) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./isString')(element)).to.equal(false);
+    });
+  });
+};
+```
+
+Vamos retirar apenas o miolo delas:
+
+```js
+values.forEach( (element) => {
+  it('testando: '+element,  () => {
+    expect(require('./isString')(element)).to.equal(true);
+  });
+});
+
+values.forEach( (element) => {
+  it('testando: '+element,  () => {
+    expect(require('./isString')(element)).to.equal(false);
+  });
+});
+```
+
+Agora sim você deve ter percebido que o único valor que mudou nas 2 foi... ???
+
+> O valor que passamos para função `to.equal`!
+
+Pronto! Agora basta mudarmos esse valor para uma variável que as 2 funções ficarão iguais:
+
+```js
+values.forEach( (element) => {
+  it('testando: '+element,  () => {
+    expect(require('./isString')(element)).to.equal(valueToTest);
+  });
+});
+
+values.forEach( (element) => {
+  it('testando: '+element,  () => {
+    expect(require('./isString')(element)).to.equal(valueToTest);
+  });
+});
+```
+
+Aí você deve se perguntar: 
+
+> De onde vem o valor de `valueToTest`?
+
+Ótima pergunta! Vem pela função genérica que iremos criar:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+const valuesTRUE = ['Suissa', '1', '', ' '];
+const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
+
+const test = (values, valueToTest) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./isString')(element)).to.equal(valueToTest);
+    });
+  });
+};
+
+describe('isString', () => {
+  describe('é String',  () => test(valuesTRUE, true));
+  describe('não é String',  () => test(valuesFALSE, false));
+});
+```
+
 
