@@ -2,8 +2,8 @@
 
 const expect = require('chai').expect;
 
-const valueFalse = ['abc',1020,'@2222','',123456789,00];
-const valueTrue = ['60422522000103','32961969000115'];
+const valueFalse = ['','000000000'];
+const valueTrue = ['60422522000103','04584044000167'];
 
 const testeFalse = (values) => {
 	values.forEach((element,index) =>{
@@ -22,9 +22,9 @@ const testeTrue = (values) => {
 	});
 }
 
-describe('Teste de cpf ',() => {
-	describe('cpf invalido: ',() => testeFalse(valueFalse));
-	describe('cpf validos: ',() => testeTrue(valueTrue));
+describe('Teste de cnpj ',() => {
+	describe('cnpj invalido: ',() => testeFalse(valueFalse));
+	describe('cnpj validos: ',() => testeTrue(valueTrue));
 });
 
 
