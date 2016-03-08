@@ -2,6 +2,8 @@
 
 const expect = require('chai').expect;
 
+const valuesTRUE = ['Suissa', '1', '', ' '];
+const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
 const test = (values, valueToTest) => {
   values.forEach( (element) => {
     it('testando: '+element,  () => {
@@ -10,29 +12,20 @@ const test = (values, valueToTest) => {
   });
 };
 const describes = [
-  { type: true
-  , message: 'é String'
-  , test: test
-  , values: ['Suissa', '1', '', ' ']
-  }
-, 
-  { type: false
-  , message: 'não é String'
-  , test: test
-  , values: [null, undefined, 1, true, {}, ()=>{}]
-  }
+  {type: true, message: 'é String', test: test}
+, {type: false, message: 'não é String', test: test}
 ]
 
 describe('isString', () => {
   describes.forEach( (element, index) => {
     if(element.type) {
       describe(element.message,  () => {
-        test(element.values, element.type);
+        test(valuesTRUE, element.type);
       });
     }
     else {
       describe(element.message,  () => {
-        test(element.values, element.type);
+        test(valuesFALSE, element.type);
       });
     }
   });

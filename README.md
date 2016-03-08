@@ -587,4 +587,150 @@ describe('isString', () => {
 });
 ```
 
+Acho que agora temos um padrão bem simples e claro para utilizar em nossos testes, não?
+
+Bom eu ainda quero refatorar mais um pouco, mas o que podemos fazer então?
+
+Podemos ver que dentro do `describe` *master* `describe('isString'` nós **SEMPRE** teremos apenas 2 `describe`s:
+
+```js
+describe('isString', () => {
+  describe('é String',  () => test(valuesTRUE, true));
+  describe('não é String',  () => test(valuesFALSE, false));
+});
+```
+
+Agora vamos analisar o padrão deles:
+
+```js
+const messageTRUE = 'é String';
+const messageFALSE = 'não é String';
+
+describe('isString', () => {
+  describe(messageTRUE,  () => test(valuesTRUE, true));
+  describe(messageFALSE,  () => test(valuesFALSE, false));
+});
+```
+
+Sabemos então que o `describe` é formado de:
+
+- mensagem para o teste
+- função que executa o teste
+
+O que precisamos fazer é criar um objeto que possa agregar toda essa lógica, por exemplo:
+
+```js
+const valuesTRUE = ['Suissa', '1', '', ' '];
+const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
+const test = (values, valueToTest) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./isString')(element)).to.equal(valueToTest);
+    });
+  });
+};
+const describes = [
+  {type: true, message: 'é String', test: test}
+, {type: false, message: 'não é String', test: test}
+]
+```
+
+Então em 1 objeto nós temos:
+
+- type: tipo do teste
+- message: mensagem do teste
+- test: função de validação
+
+Estamos usando a mesma função genérica `test` criada anteriormente e agora como faço isso funcionar com o `describe`?
+
+Então aqui precisamos entender que não podemos fazer como no `it`, que deixamos bem genérico, em vez disso precisamos **obrigatoriamente** ter 2 `describe`s separados.
+
+Podemos fazer da seguinte forma:
+
+1. itere no *array* `describes`
+2. teste o `type` do `describe`
+3. crie o `describe` correto a partir do `type`
+4. chame a função `test` corretamente
+
+Fazendo isso nosso código ficará assim:
+
+```js
+describe('isString', () => {
+  describes.forEach( (element, index) => {
+    if(element.type) {
+      describe(element.message,  () => {
+        test(valuesTRUE, element.type);
+      });
+    }
+    else {
+      describe(element.message,  () => {
+        test(valuesFALSE, element.type);
+      });
+    }
+  });
+});
+```
+
+Perceba que quando ele entrar em `if(element.type)` só entrará com o objeto com o `type=true`, nesse caso irá criar o `describe` correto para os teste que devem dar `true` e logo após no `else` cria o `describe` para os valores que devem dar `false`.
+
+Juntando tudo isso nosso código ficou assim:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+const valuesTRUE = ['Suissa', '1', '', ' '];
+const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
+const test = (values, valueToTest) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./isString')(element)).to.equal(valueToTest);
+    });
+  });
+};
+const describes = [
+  {type: true, message: 'é String', test: test}
+, {type: false, message: 'não é String', test: test}
+]
+
+describe('isString', () => {
+  describes.forEach( (element, index) => {
+    if(element.type) {
+      describe(element.message,  () => {
+        test(valuesTRUE, element.type);
+      });
+    }
+    else {
+      describe(element.message,  () => {
+        test(valuesFALSE, element.type);
+      });
+    }
+  });
+});
+```
+
+Agora execute ele no terminal:
+
+```
+mocha isString/isString.test.module.js
+
+
+  isString
+    é String
+      ✓ testando: Suissa
+      ✓ testando: 1
+      ✓ testando: 
+      ✓ testando:  
+    não é String
+      ✓ testando: null
+      ✓ testando: undefined
+      ✓ testando: 1
+      ✓ testando: true
+      ✓ testando: [object Object]
+      ✓ testando: ()=>{}
+
+
+  10 passing (16ms)
+```
 
