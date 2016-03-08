@@ -1,6 +1,5 @@
 'use strict';
 
-
 const describes = [
   { type: true
   , message: 'é String'
