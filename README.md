@@ -321,12 +321,12 @@ Então basicamente separamos nossos testes em 2:
 
 ```js
 describe('é String',  () => {
-  it('testando: "'+valueTRUE+'"', () => {
+  it('testando: '+valueTRUE, () => {
     expect(require('./isString')(valueTRUE)).to.equal(true);
   });
 });
 describe('não é String',  () => {
-  it('testando: "'+valueFALSE+'"', () => {
+  it('testando: '+valueFALSE, () => {
     expect(require('./isString')(valueFALSE)).to.equal(false);
   });
 });
@@ -340,12 +340,12 @@ mocha isString/isString.test.js
 
   isString
     é String
-      ✓ testando: "Suissa"
+      ✓ testando: Suissa
     não é String
-      ✓ testando: "1"
+      ✓ testando: 1
 
 
-  2 passing (26ms)
+  2 passing (28ms)
 ```
 
 Pronto ele não teve erros pois validamos nossos testes corretamente, porém testamos apenas com 1 valor e isso é ridículo né?
@@ -386,7 +386,7 @@ Bem simples não? Então basta fazer o que?
 Criar uma função que itere sobre os valores do *array* e vá executando o `it` que é a função que irá testar realmente os valores:
 
 ```js
-it('testando: "'+valueTRUE+'"', () => {
+it('testando: '+valueTRUE, () => {
   expect(require('./isString')(valueTRUE)).to.equal(true);
 });
 ```
@@ -403,7 +403,7 @@ Dessa forma:
 
 ```js
 valuesTRUE.forEach( function(element, index) {
-  it('testando: "'+element+'"',  () => {
+  it('testando: '+element,  () => {
     expect(require('./isString')(element)).to.equal(true);
   });
 });
@@ -424,18 +424,42 @@ const valuesFALSE = [null, undefined, 1, true, {}, ()=>{}];
 describe('isString', function() {
   describe('é String',  () => {
     valuesTRUE.forEach( function(element, index) {
-      it('testando: "'+element+'"',  () => {
+      it('testando: '+element,  () => {
         expect(require('./isString')(element)).to.equal(true);
       });
     });
   });
   describe('não é String',  () => {
     valuesFALSE.forEach( function(element, index) {
-      it('testando: "'+element+'"',  () => {
+      it('testando: '+element,  () => {
         expect(require('./isString')(element)).to.equal(false);
       });
     });
   });
 });
+```
+
+Executando nosso teste ficará assim:
+
+```
+mocha isString/isString.test.js
+
+
+  isString
+    é String
+      ✓ testando: Suissa
+      ✓ testando: 1
+      ✓ testando: 
+      ✓ testando:  
+    não é String
+      ✓ testando: null
+      ✓ testando: undefined
+      ✓ testando: 1
+      ✓ testando: true
+      ✓ testando: [object Object]
+      ✓ testando: ()=>{}
+
+
+  10 passing (28ms)
 ```
 
