@@ -734,3 +734,156 @@ mocha isString/isString.test.module.js
   10 passing (16ms)
 ```
 
+Agora sabe o que seria bom?
+
+> Dar uma refatoradinha marota!
+
+**MAS POR QUE CARAIOOOOO!!!??**
+
+Apenas observe:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+const test = (values, valueToTest) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./isString')(element)).to.equal(valueToTest);
+    });
+  });
+};
+const describes = [
+  { type: true
+  , message: 'é String'
+  , test: test
+  , values: ['Suissa', '1', '', ' ']
+  }
+, 
+  { type: false
+  , message: 'não é String'
+  , test: test
+  , values: [null, undefined, 1, true, {}, ()=>{}]
+  }
+]
+
+describe('isString', () => {
+  describes.forEach( (element, index) => {
+    if(element.type) {
+      describe(element.message,  () => {
+        test(element.values, element.type);
+      });
+    }
+    else {
+      describe(element.message,  () => {
+        test(element.values, element.type);
+      });
+    }
+  });
+});
+```
+
+**Ah legal você só mudou os valores para dentro do objeto e aí?**
+
+Tente advinhar o porquê eu fiz isso!
+
+Tá vou te ajudar.
+
+Imagine que você quer transformar agora esse código em um módulo de testes genérico, como você faria? Que possa ser usado dessa forma:
+
+```js
+const describes = [
+  { type: true
+  , message: 'é String'
+  , values: ['Suissa', '1', '', ' ']
+  }
+, 
+  { type: false
+  , message: 'não é String'
+  , values: [null, undefined, 1, true, {}, ()=>{}]
+  }
+];
+require('./index')('isString', describes);
+```
+
+Vou lhe falar como eu faria então.
+
+Perceba que não tenho mais a função `test` nesse objeto pois não é da responsabilidade dele conhecer essa função, sua única responsabilidade é ter os dados necessários para testar, nossa função `test` já é genérica para funcionar sem precisar ser definida anteriormente.
+
+Beleza então vamos criar o `testModule/testModule.js`:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+module.exports = (testName, describes) => {
+}
+```
+
+Agora você entenderá o porquê passamos o `testName` também, antes de refatorarmos vamos analisar a função `test`:
+
+```js
+const test = (values, valueToTest) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./isString')(element)).to.equal(valueToTest);
+    });
+  });
+};
+```
+
+Percebeu que o únco valor definido diretamente ali é o `'./isString'`?
+
+É exatamente por isso que passamos esse valor para nosso módulo em vez de definir manualmente, para que dessa forma ele possa funcionar com qualquer outro módulo.
+
+Então nossa função refatorada fica assim:
+
+```js
+const test = (values, valueToTest) => {
+  values.forEach( (element) => {
+    it('testando: '+element,  () => {
+      expect(require('./../'+testName+'/'+testName)(element)).to.equal(valueToTest);
+    });
+  });
+};
+```
+
+Claro que precisamos definir um padrão de pastas para que funcione sem problemas, mas isso é assunto para outra aula :p
+
+Depois disso basta colocar o `testName` no primeiro `describe` e pronto!
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+module.exports = (testName, describes) => {
+
+  const test = (values, valueToTest) => {
+    values.forEach( (element) => {
+      it('testando: '+element,  () => {
+        expect(require('./../'+testName+'/'+testName)(element)).to.equal(valueToTest);
+      });
+    });
+  };
+
+  describe(testName, () => {
+    describes.forEach( (element, index) => {
+      if(element.type) {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+      else {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+    });
+  });
+};
+```
+
+
