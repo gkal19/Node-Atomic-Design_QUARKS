@@ -46,9 +46,12 @@ module.exports = (value) => {
     }else {
         digitoVerificador = 11 - resto1;
     }
-
+    //O RESTO DA DIVISÃO É QUEM DETERMINA O VALOR DE DIGITOVERIFICADOR 
     let digito1 = arrayValue.length - 2;
 
+    /**
+        A VALIDAÇÃÇO DO SEGUNDO DIGITO É UMA PARTE REPETIDA NO CÓDIGO QUE SERÁ REFATORADA
+    **/
     
 
     // INICIO DA VERIFICAÇÃO DO SEGUNDO DIGITO
