@@ -23,6 +23,10 @@ module.exports = (value) => {
     const arraySegundoDig = ['6','5','4','3','2','9','8','7','6','5','4','3','2'];
     const segundoDig = 1;
 
+    /**
+        INICIO DA FUNÇAO QUE VAI VERIFICAR O PRIMEIRO E SEGUNDO DIGITO DO 
+        CNPJ REALIZANDO ASSIM SUA VALIDAÇÃO
+    **/
 
     const verificaDigito = (campos , colunas , arrayVerificador,numDigito) => {     
         
