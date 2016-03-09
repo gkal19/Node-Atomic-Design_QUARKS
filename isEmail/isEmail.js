@@ -6,6 +6,9 @@ module.exports = (value) => {
 	const isEmpty = require('../isEmpty/isEmpty')(value);
 	if(isEmpty) return false;
 
+	const isString = require('../isString/isString')(value);
+	if(!isString) return false;
+
 	return regex.test(value);
 
  }
