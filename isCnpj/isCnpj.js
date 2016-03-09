@@ -14,6 +14,7 @@ module.exports = (value) => {
     if(value < 13) return false;
 
 
+
     let campos = value.split('');
     let colunas = [];
     const arrayPrimeiroDig = ['5','4','3','2','9','8','7','6','5','4','3','2'];
