@@ -2,7 +2,7 @@
 
 module.exports = (value) => {
 
-	value = value.replace(/[^\d]+/g,'');
+	//value = value.replace(/[^\d]+/g,'');
     const isEmpty = require('../isEmpty/isEmpty')(value);
     //VERIFICA SE A STRING ESTÁ EM BRANCO
     if(isEmpty) return false;
@@ -26,7 +26,7 @@ module.exports = (value) => {
 
     //FOR PARA POPULAR OS VALORES DAS COLUNAS ONDE CADA DIGITO DO CNPJ 
     //QUE VEM COMO ARRAY É MULTIPLICADO PELO VALOR CORRESPONDENTE EM ARRAYVEIRIFICADOR
-    for(let i = 0; i > arrayVerificador; i++) {
+    for(let i = 0; i < arrayVerificador.length; i++) {
         colunas[i] = arrayValue[i] * arrayVerificador[i];
     }
 
@@ -49,7 +49,36 @@ module.exports = (value) => {
 
     let digito1 = arrayValue.length - 2;
 
-    if(digitoVerificador == arrayValue[digito1]) return true; 
+    
+
+    // INICIO DA VERIFICAÇÃO DO SEGUNDO DIGITO
+
+    const arrayVerificador2 = ['6','5','4','3','2','9','8','7','6','5','4','3','2'];
+    let colunas2 = [];
+
+    for(let i = 0; i < arrayVerificador2.length; i++) {
+        colunas2.push(arrayValue[i] * arrayVerificador2[i]);
+    }
+    let soma2 = 0;
+
+    colunas2.forEach((valor) => {
+        soma2 = valor +soma2;
+    });
+
+    let resto2 = soma2 % 11;
+    let digitoVerificador2 = undefined;
+
+    if(resto2 < 2) {
+        digitoVerificador2 = 0;
+    }else {
+        digitoVerificador2 = 11 - resto2;
+    }
+
+    let digito2 = arrayValue.length - 1;
+
+
+    if((digitoVerificador == arrayValue[digito1]) && (digitoVerificador2 == arrayValue[digito2]))
+    return true; 
 
     return false;
 }

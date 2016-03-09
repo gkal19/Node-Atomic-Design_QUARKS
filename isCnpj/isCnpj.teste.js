@@ -2,8 +2,9 @@
 
 const expect = require('chai').expect;
 
-const valueFalse = ['','000000000'];
-const valueTrue = ['60422522000103','04584044000167'];
+const valueFalse = ['','000000000','abc',0,94159237000163];
+const valueTrue = ['22135485000163','72742590000139',
+'14998592000197','65194774000146','94159237000163'];
 
 const testeFalse = (values) => {
 	values.forEach((element,index) =>{
