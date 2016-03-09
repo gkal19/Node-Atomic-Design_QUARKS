@@ -2,8 +2,8 @@
 
 const expect = require('chai').expect;
 
-const valueTrue = ['05068287512','86323155281',04764049325];
-const valueFalse = ['111111111','@31231ws',''];
+const valueTrue = ['05068287512'];
+const valueFalse = ['@31231ws',''];
 
 const testeTrue = (values) => {
 	values.forEach((element,index) => {
