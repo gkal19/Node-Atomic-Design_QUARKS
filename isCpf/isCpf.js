@@ -8,14 +8,18 @@ module.exports = (value) => {
 	const isString = require('../isString/isString')(value);
 	if(!isString) return false;
 
+
 	let campos = value.split('');
 	let colunas = [];
+	
 	const arrayPrimeiroDig = ['10','9','8','7','6','5','4','3','2'];
 	const primeiroDig = 2;
 
 	const arraySegundoDig = ['11','10','9','8','7','6','5','4','3','2'];
 	const segundoDig = 1;
-	
+
+	if(value.length != 11) return false;
+	if(value == '00000000000') return false;
 
 
 	const verificaDigito = (campos , colunas , arrayVerificador,numDigito) => {		
@@ -23,9 +27,6 @@ module.exports = (value) => {
 		for(let i = 0; i < arrayVerificador.length; i++) {
 			colunas[i] = campos[i] * arrayVerificador[i];
 		}
-
-		//console.log('colunas: '+colunas.length);
-		//console.log('campos: '+campos.length);
 
 		let soma = 0;
 
@@ -44,12 +45,6 @@ module.exports = (value) => {
 
 		let digito = campos.length - numDigito;
 
-		//if(numDigito == 1) console.log('Verificando segundo digito');
-		//if(numDigito == 2) console.log('Verificando primeiro digito');
-		//console.log('digito do cpf: '+campos[digito]);
-		//console.log('digito Verificador: '+digitoVerificador);
-
-
 		if(digitoVerificador == campos[digito])
 			return true;
 		return false;
@@ -61,6 +56,5 @@ module.exports = (value) => {
 	if(valorPrimeiro && valorSegundo) 
 		return true;
 	return false;
-	//console.log('Verificando o primeiro digito: '+verificaDigito(campos,colunas,arrayPrimeiroDig,primeiroDig));
-	//console.log('Verificando o segundo digito: '+verificaDigito(campos,colunas,arraySegundoDig,segundoDig));
+
 }
