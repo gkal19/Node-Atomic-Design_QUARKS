@@ -1,19 +1,32 @@
 'use strict';
 
-const assert = require('assert');
+const expect = require('chai').expect;
 
-const cnpjInvalido = '121323';
-const cnpjNumberErr = 40201011222;
-const cnpjNumberOk = '60422522000103'
-const cnpjValido = '32961969000115';
+const valueFalse = [2222222222222,'','0000000000000','abc',94159237000163,
+44444444444444,444,'94159237000162'];
+const valueTrue = ['22135485000163','72742590000139',
+'14998592000197','65194774000146','94159237000163'];
 
-assert.equal(true,require('./isCnpj')(cnpjValido));
-assert.equal(true,require('./isCnpj')(cnpjNumberOk));
-assert.equal(false,require('./isCnpj')(cnpjInvalido));
-assert.equal(false,require('./isCnpj')(cnpjNumberErr));
+const testeFalse = (values) => {
+	values.forEach((element,index) =>{
+		it('Testando: '+element,() => {
+			expect(require('./isCnpj')(element)).to.equal(false);
+		});
+	});
+}
 
 
-console.log(cnpjValido + ' é um cnpj?', require('./isCnpj')(cnpjValido));
-console.log(cnpjNumberOk + ' é um cnpj?', require('./isCnpj')(cnpjNumberOk));
-console.log(cnpjNumberErr + ' é um cnpj?', require('./isCnpj')(cnpjNumberErr));
-console.log(cnpjInvalido + ' é um cnpj?', require('./isCnpj')(cnpjInvalido));
+const testeTrue = (values) => {
+	values.forEach( (element,index) => {
+		it('Testando: '+element,() => {
+			expect(require('./isCnpj')(element)).to.equal(true);
+		});
+	});
+}
+
+describe('Teste de cnpj ',() => {
+	describe('cnpj invalido: ',() => testeFalse(valueFalse));
+	describe('cnpj validos: ',() => testeTrue(valueTrue));
+});
+
+

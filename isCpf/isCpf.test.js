@@ -1,23 +1,27 @@
 'use strict';
 
-const assert = require('assert');
+const expect = require('chai').expect;
 
-const cpfErrado = '05044099820';
-const cpfEmBranco = '';
-const cpfCerto = '05068287512';
-const cpfErrado2 = 'teste';
-const cpfDoido = '@312312';
+const valueTrue = ['05068287512','92317530536','80713524383','41157282644'];
+const valueFalse = ['@31231ws','',0,123456789,'00000000000'];
 
+const testeTrue = (values) => {
+	values.forEach((element,index) => {
+		it('testando: '+element,() => {
+			expect(require('./isCpf')(element)).to.equal(true);
+		});
+	});
+}
 
-assert.equal(false,require('./isCpf')(cpfErrado));
-assert.equal(false,require('./isCpf')(cpfEmBranco));
-assert.equal(true,require('./isCpf')(cpfCerto));
+const testeFalse = (values) => {
+	values.forEach((element,index) => {
+		it('testando: '+element,() => {
+			expect(require('./isCpf')(element)).to.equal(false);
+		});
+	});
+}
 
-console.log('erros de cpf:');
-console.log(cpfErrado + ' é um cpf?', require('./isCpf')(cpfErrado));
-console.log(cpfEmBranco + ' é um cpf?', require('./isCpf')(cpfEmBranco));
-console.log(cpfErrado2 + 'é um cpf?' , require('./isCpf')(cpfErrado2));
-console.log(cpfDoido + 'é um cpf?', require('./isCpf')(cpfDoido));
-
-console.log('cpfs certos');
-console.log(cpfCerto + ' é um cpf?', require('./isCpf')(cpfCerto));
+describe('testando cpf :', () => {
+	describe('teste true: ',() => testeTrue(valueTrue));
+	describe('teste false: ',() => testeFalse(valueFalse));
+});

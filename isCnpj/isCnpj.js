@@ -1,54 +1,87 @@
 'use strict';
 
 module.exports = (value) => {
-	if(typeof value === 'number') return false;
 
-	value = value.replace(/[^\d]+/g,'');
+	//value = value.replace(/[^\d]+/g,'');
+    const isEmpty = require('../isEmpty/isEmpty')(value);
+    //VERIFICA SE A STRING ESTÁ EM BRANCO
+    if(isEmpty) return false;
 
-    if(value == '') return false;
+    const isString = require('../isString/isString')(value);
+    //VEIRIFICA SE NÃO É UMA STRING
+    if(!isString) return false;
+    //VEIRIFICA SE O VALOR É MENOR QUE 13
+    if(value < 13) return false;
 
-    if (value.length != 14)
-        return false;
+    //INICIA VALIDAÇÃO DO CNPJ
+    /**
+        A VALIDAÇÃO DO CNPJ CONSISTE EM DUAS PARTES UMA PARA ENCONTRAR O VALOR DO PRIMEIRO
+        DIGITO VERIFICADOR E A SEGUNDA ENCONTRA O VALOR DO SEGUNDO
+    **/
 
-    // LINHA 10 - Elimina CNPJs invalidos conhecidos
-    if (value == "00000000000000" || 
-        value == "11111111111111" || 
-        value == "22222222222222" || 
-        value == "33333333333333" || 
-        value == "44444444444444" || 
-        value == "55555555555555" || 
-        value == "66666666666666" || 
-        value == "77777777777777" || 
-        value == "88888888888888" || 
-        value == "99999999999999")
-        return false; // LINHA 21
+    //VALIDAÇÃO DO PRIMEIRO DIGITO VERIFICADOR
+    let arrayValue = value.split('');
+    let colunas = [];
+    const arrayVerificador = ['5','4','3','2','9','8','7','6','5','4','3','2'];
 
-    // Valida DVs LINHA 23 -
-    var tamanho = value.length - 2
-    var numeros = value.substring(0,tamanho);
-    var digitos = value.substring(tamanho);
-    var soma = 0;
-    var pos = tamanho - 7;
-    for (var i = tamanho; i >= 1; i--) {
-      soma += numeros.charAt(tamanho - i) * pos--;
-      if (pos < 2)
-            pos = 9;
+    //FOR PARA POPULAR OS VALORES DAS COLUNAS ONDE CADA DIGITO DO CNPJ 
+    //QUE VEM COMO ARRAY É MULTIPLICADO PELO VALOR CORRESPONDENTE EM ARRAYVEIRIFICADOR
+    for(let i = 0; i < arrayVerificador.length; i++) {
+        colunas[i] = arrayValue[i] * arrayVerificador[i];
     }
-    var resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-    if (resultado != digitos.charAt(0))
-        return false;
 
-    tamanho = tamanho + 1;
-    numeros = value.substring(0,tamanho);
-    soma = 0;
-    pos = tamanho - 7;
-    for (i = tamanho; i >= 1; i--) {
-      soma += numeros.charAt(tamanho - i) * pos--;
-      if (pos < 2)
-            pos = 9;
+    let soma1 = 0;
+    //APÓS O ARRAY POPULADO É FEITO UM FOR PEGANDO CADA VALOR E SOMANDO AO PROXIMO
+    colunas.forEach((valor) => {
+        soma1 = valor + soma1;
+    });
+
+    //A SOMA É DIVIDIDA POR 11 E O RESTO DA DIVISÃO ENTRA EM UMA CONDIÇIONAL
+    let resto1 = soma1 % 11;
+    let digitoVerificador = undefined;
+    
+    //AQUI O RESTO DA DIVISÃO É TESTADO
+    if(resto1 < 2) {
+        digitoVerificador = 0;
+    }else {
+        digitoVerificador = 11 - resto1;
     }
-    resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-    if (resultado != digitos.charAt(1))
-          return false; // LINHA 49
-    return true;
+    //O RESTO DA DIVISÃO É QUEM DETERMINA O VALOR DE DIGITOVERIFICADOR 
+    let digito1 = arrayValue.length - 2;
+
+    /**
+        A VALIDAÇÃÇO DO SEGUNDO DIGITO É UMA PARTE REPETIDA NO CÓDIGO QUE SERÁ REFATORADA
+    **/
+    
+
+    // INICIO DA VERIFICAÇÃO DO SEGUNDO DIGITO
+
+    const arrayVerificador2 = ['6','5','4','3','2','9','8','7','6','5','4','3','2'];
+    let colunas2 = [];
+
+    for(let i = 0; i < arrayVerificador2.length; i++) {
+        colunas2.push(arrayValue[i] * arrayVerificador2[i]);
+    }
+    let soma2 = 0;
+
+    colunas2.forEach((valor) => {
+        soma2 = valor +soma2;
+    });
+
+    let resto2 = soma2 % 11;
+    let digitoVerificador2 = undefined;
+
+    if(resto2 < 2) {
+        digitoVerificador2 = 0;
+    }else {
+        digitoVerificador2 = 11 - resto2;
+    }
+
+    let digito2 = arrayValue.length - 1;
+
+
+    if((digitoVerificador == arrayValue[digito1]) && (digitoVerificador2 == arrayValue[digito2]))
+    return true; 
+
+    return false;
 }
