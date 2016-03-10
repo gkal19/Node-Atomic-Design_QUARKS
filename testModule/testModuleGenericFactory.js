@@ -9,14 +9,13 @@ module.exports = (testName, describes) => {
 
   let findTest = (element) => {
     let regex = new RegExp(element, 'i');
-    console.log('regex:', testName.match(regex))
     if(!!testName.match(regex)){
       testQuark = require('./config/testQuark'+element);
-      return element;
     }
   };
 
-  let testQuarkArr = testTypes.filter(findTest);
+  testTypes.forEach(findTest);
+
   let test = (values, valueToTest) => {
     if(isQuarkTo) testQuark(values, valueToTest, testName, describes);
     else testQuark(values, valueToTest, testName);
