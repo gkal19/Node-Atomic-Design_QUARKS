@@ -8,16 +8,19 @@ module.exports = (testName, describes) => {
 
       let valuesExpectedIndex = 0;
       if(!valueToTest) valuesExpectedIndex = 1;
-
-      let valueToTransform = 0;
+      console.log('values', values)
+      let valueConverted = 0;
       values.forEach( (element, index) => {
-        valueToTransform = describes[valuesExpectedIndex].valuesExpected[index];
-        it('testando: '+element+' com '+valueToTransform,  () => {
+        valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+        console.log('valueConverted', valueConverted);
+        it('testando: '+element+' com '+valueConverted,  () => {
           let validated = require('./../'+testName+'/'+testName)(element);
-          if(valueToTest) expect(validated).to.equal(describes[valuesExpectedIndex].valuesExpected[index]);
-          else expect(validated).to.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+          if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+          else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+
         });
       });
+
     }
     else {
       values.forEach( (element, index) => {
@@ -48,7 +51,10 @@ module.exports = (testName, describes) => {
         });
       }
       else {
+        console.log('aqui começa')
         describe(element.message,  () => {
+          console.log('element.values', element.values)
+          console.log('element.type', element.type)
           test(element.values, element.type);
         });
       }

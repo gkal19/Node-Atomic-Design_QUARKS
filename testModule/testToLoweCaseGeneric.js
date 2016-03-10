@@ -9,7 +9,7 @@ const describes = [
 , { type: false
   , message: 'não to LOWER'
   , values: ['Suissa', 'Itacir']
-  , valuesExpected: ['Suissa', 'Itacir']
+  , valuesExpected: ['suissa', 'Itacir']
   }
 ];
 require('./testModuleGenericTESTE')('toLowerCase', describes);

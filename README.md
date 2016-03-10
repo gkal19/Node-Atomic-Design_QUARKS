@@ -1485,7 +1485,7 @@ Devemos então criar uma lógica para que dentro do `forEach` ele consiga testar
 
 ```js
 values.forEach( (element, index) => {
-  it('testando: '+element+' com '+valueToTransform,  () => {
+  it('testando: '+element+' com '+valueConverted,  () => {
 
     let validated = require('./../'+testName+'/'+testName)(element);
     if(valueToTest) expect(validated).to.equal(VALOR_ESPERADO);
@@ -1501,18 +1501,150 @@ Sabemos que o `VALOR_ESPERADO` é um *array* com essa estrutura:
 ['suissa', 'itacir']
 ```
 
-```js
-let valuesExpectedIndex = 0;
-if(!valueToTest) valuesExpectedIndex = 1;
+Sabendo que nosso primeiro teste sempre será verdadeiro, podemos tentar isso:
 
-let valueToTransform = 0;
+```js
 values.forEach( (element, index) => {
-  valueToTransform = describes[valuesExpectedIndex].valuesExpected[index];
-  it('testando: '+element+' com '+valueToTransform,  () => {
+  it('testando: '+element,  () => {
     let validated = require('./../'+testName+'/'+testName)(element);
-    if(valueToTest) expect(validated).to.equal(describes[valuesExpectedIndex].valuesExpected[index]);
-    else expect(validated).to.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+    console.log('valueToTest', valueToTest);
+    console.log('validated', validated);
+    console.log('valuesExpected', describes[0].valuesExpected[index]);
+    if(valueToTest) expect(validated).to.equal(describes[0].valuesExpected[index]);
   });
 });
 
 ```
+
+Se você rodar esse teste resultará nisso:
+
+```js
+    to LOWER
+valueToTest true
+validated suissa
+valuesExpected suissa
+      ✓ testando: Suissa
+valueToTest true
+validated itacir
+valuesExpected itacir
+      ✓ testando: Itacir
+    não to LOWER
+valueToTest false
+validated suissa
+valuesExpected suissa
+      ✓ testando: Suissa
+valueToTest false
+validated itacir
+valuesExpected itacir
+      ✓ testando: Itacir
+
+
+  4 passing (17ms)
+```
+
+Todos os testes passaram mesmo estando errado porque ele está testando `validated` com `valuesExpected` sendo que o `validate` possui o valor transformado e como estamos estando apenas o teste verdadeiro, logo ele sempre dará `true`.
+
+Para resolver esse problema precisamos antes de tudo separar os teste de verdadeiro e falso, para isso entenda como a função `test` é chamada dentro do `describes.forEach`:
+
+```js
+describes.forEach( (element, index) => {
+  if(element.type) {
+    describe(element.message,  () => {
+      test(element.values, element.type);
+    });
+  }
+  else {
+    describe(element.message,  () => {
+      test(element.values, element.type);
+    });
+  }
+  if(element.list) return true;
+});
+```
+
+O valor `element.values` que é passados para a função `test` é o *array* `values` do *array* `describes` e o segundo parâmetro `element.type` é `true` ou `false` apenas.
+
+Sabendo disso podemos definir de qual *array* iremos testar os valores definindo qual o índice dele dessa forma:
+
+```js
+let valuesExpectedIndex = 0; //verdadeiro
+if(!valueToTest) valuesExpectedIndex = 1; //falso
+```
+
+Pois o valor de `valueToTest` será OU `true` OU `false`, então definimos que o `valuesExpectedIndex` será `0`, porém se `valueToTest` for `false` definimos `valuesExpectedIndex` como `1` pois é seu índice em `describes`.
+
+**Agora precisamos resolver a lógica de qual valor será transformado.**
+
+```js
+let valueConverted = 0;
+values.forEach( (element, index) => {
+  valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+  console.log('valueConverted', valueConverted);
+});
+```
+
+Conferindo nossos valores:
+
+```
+valueConverted suissa
+valueConverted itacir
+valueConverted Suissa
+valueConverted Itacir
+```
+
+Ok já conseguimos pegar os valores corretos agora vamos para  teste propriamente dito:
+
+```js
+if(valueToTest) expect(validated).to.equal(describes[0].valuesExpected[index]);
+```
+
+Com esse código testamos apenas o teste verdadeiro, então fica fácil criar o teste falso:
+
+```js
+if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+```
+
+Usamos o `to.deep.not.equal` pois testamos o `validated`, que é nosso valor transformado, com o valor de `valuesExpected` que não estão em *lowerCase*.
+
+Deixando nosso `if` desse tipo de teste assim:
+
+```js
+if(testName.indexOf('to') > -1){
+
+  let valuesExpectedIndex = 0;
+  if(!valueToTest) valuesExpectedIndex = 1;
+  let valueConverted = 0;
+  values.forEach( (element, index) => {
+    valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+    it('testando: '+element+' com '+valueConverted,  () => {
+      let validated = require('./../'+testName+'/'+testName)(element);
+
+      if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+
+      else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+
+    });
+  });
+
+}
+```
+
+Agora vamos testar esse módulo forçando um erro:
+
+```js
+const describes = [
+  { type: true
+  , message: 'to LOWER'
+  , values: ['Suissa', 'Itacir']
+  , valuesExpected: ['suissa', 'itacir']
+  }
+, { type: false
+  , message: 'não to LOWER'
+  , values: ['Suissa', 'Itacir']
+  , valuesExpected: ['suissa', 'Itacir']
+  }
+];
+require('./testModuleGenericTESTE')('toLowerCase', describes);
+```
+
