@@ -1057,7 +1057,46 @@ Pense comigo, se o módulo testa se um valor está no *array* então o que ele d
 - não é vazio?
 - é *array*?
 
-Vamos ver então como usamos esse módulo:
+Então bora colocar esses testes no módulo `isInArray`:
+
+```js
+module.exports = (value, list) => {
+  const isEmptyValue = require('./../isEmpty/isEmpty')(value);
+  const isEmptyArray = require('./../isEmpty/isEmpty')(list);
+  const isArray = require('./../isArray/isArray')(list);
+
+  if(!isEmptyValue && !isEmptyArray && isArray)
+    return require('./createIsIn')(list)(value);
+  return false;
+};
+```
+
+Bom o `isEmpty` já conhecemos porém estamos usando o `isArray` que ainda não existe, logo precisamos criá-lo:
+
+```js
+module.exports = (value) => {
+  return (value instanceof Array);
+}
+```
+
+**Super simples né?**
+
+Agora podemos fazer esse teste simples com o `isArray`:
+
+```js
+const assert = require('assert');
+
+const valueTRUE = [1, 2];
+const valueFALSE = '1';
+
+assert.equal(true, require('./isArray')(valueTRUE));
+assert.equal(false, require('./isArray')(valueFALSE));
+
+console.log(valueTRUE + ' é um Array?', require('./isArray')(valueTRUE));
+console.log(valueFALSE + ' é um Array?', require('./isArray')(valueFALSE));
+```
+
+Podemos agora voltar ao `isInArray` para ver como usamos esse módulo:
 
 ```js
 const assert = require('assert');
@@ -1299,5 +1338,181 @@ module.exports = (testName, describes) => {
     });
   });
 };
+
+```
+
+Para testar um *Quark is* você fará assim:
+
+```js
+const describes = [
+  { type: true
+  , message: 'é String'
+  , values: ['Suissa', '1', '', ' ']
+  }
+, 
+  { type: false
+  , message: 'não é String'
+  , values: [null, undefined, 1, true, {}, ()=>{}]
+  }
+];
+require('./testModuleGeneric')('isString', describes);
+```
+
+Para testar um *Quark isIn* você fará assim:
+
+```js
+const describes = [
+  { list: ['suissa', 'itacir'] }
+, { type: true
+  , message: 'está array'
+  , values: ['suissa', 'itacir']
+  }
+, { type: false
+  , message: 'não está array'
+  , values: ['vai corintia!', null, undefined, 1, true, {}, ()=>{}]
+  }
+];
+require('./testModuleGeneric')('isInArray', describes);
+```
+
+### testModuleGenereic
+
+Nós já iniciamos a refatoração desse módulo para aceitar também o teste do *Quark isIn* porém ainda temos os testes para o *Quark to*, como faremos para adicionar mais esse teste?
+
+Primeiramente vamos criar o *array* `describes` que devemos passar para o *Quark*:
+
+```js
+const describes = [
+  { type: true
+  , message: 'to LOWER'
+  , values: ['Suissa', 'Itacir']
+  , valuesExpected: ['suissa', 'itacir']
+  }
+, { type: false
+  , message: 'não to LOWER'
+  , values: ['Suissa', 'Itacir']
+  , valuesExpected: ['Suissa', 'Itacir']
+  }
+];
+```
+
+Percebeu que adicionei o *array* `valuesExpected`?
+
+Ele funciona como um espelho do *array* `values` que são os valores que irão entrar no *Quark*, sendo cada cada valor de `valuesExpected` o valor esperado após a transformação.
+
+**Você SEMPRE deve colocar a mesma quantidade de elementos nos 2 *arrays*!**
+
+Para depois chamar assim:
+
+```js
+require('./testModuleGeneric')('toLowerCase', describes);
+```
+
+Mas é óbvio que esse teste não irá funcionar pois ainda não criamos a lógica para ele em `testModuleGeneric`, se executarmos esse teste seu resultado será:
+
+```
+
+  toLowerCase
+    to LOWER
+      1) testando: Suissa
+      2) testando: Itacir
+    não to LOWER
+      3) testando: Suissa
+      4) testando: Itacir
+
+
+  0 passing (70ms)
+  4 failing
+
+  1) toLowerCase to LOWER testando: Suissa:
+     AssertionError: expected 'suissa' to equal true
+      at Context.<anonymous> (testModule/testModuleGeneric.js:10:30)
+
+  2) toLowerCase to LOWER testando: Itacir:
+     AssertionError: expected 'itacir' to equal true
+      at Context.<anonymous> (testModule/testModuleGeneric.js:10:30)
+
+  3) toLowerCase não to LOWER testando: Suissa:
+     AssertionError: expected 'suissa' to equal false
+      at Context.<anonymous> (testModule/testModuleGeneric.js:10:30)
+
+  4) toLowerCase não to LOWER testando: Itacir:
+     AssertionError: expected 'itacir' to equal false
+      at Context.<anonymous> (testModule/testModuleGeneric.js:10:30)
+
+```
+
+Isso acontece porque ele está testando os valores transformados com o valor de `describes type` e nós queremos que ele teste com os valores de `valuesExpected`, **então como faremos isso?**
+
+Primeiramente precisamos testar qual o tipo de teste iremos executar, para isso iremos testar o tipo pelo nome do teste, pois o mesmo deve indicar seu tipo.
+
+Para testar esse valor iremos usar o `indexOf` para verificar se o prefixo do teste `to` existe no `testName`:
+
+```js
+let test = (values, valueToTest) => {
+  if(testName.indexOf('to') > -1){
+    
+  }
+  else {
+    values.forEach( (element, index) => {
+      it('testando: '+element,  () => {
+        let validated = require('./../'+testName+'/'+testName)(element);
+        expect(validated).to.equal(valueToTest);
+      });
+    });
+  }
+};
+```
+
+Tudo bem e agora o que colocamos dentro do `if`?
+
+A mesma coisa do `else`?
+
+**CLARO QUE NÃO NÉ!!!**
+
+Vamos atacar primeiramente a lógica do `forEach`:
+
+```js
+ values.forEach( (element, index) => {
+  it('testando: '+element,  () => {
+    let validated = require('./../'+testName+'/'+testName)(element);
+    expect(validated).to.equal(valueToTest);
+  });
+});
+```
+
+Devemos então criar uma lógica para que dentro do `forEach` ele consiga testar o retorno de `validate` contra o valor correto em `valuesExpected`:
+
+```js
+values.forEach( (element, index) => {
+  it('testando: '+element+' com '+valueToTransform,  () => {
+
+    let validated = require('./../'+testName+'/'+testName)(element);
+    if(valueToTest) expect(validated).to.equal(VALOR_ESPERADO);
+
+  });
+});
+
+```
+
+Sabemos que o `VALOR_ESPERADO` é um *array* com essa estrutura:
+
+```js
+['suissa', 'itacir']
+```
+
+```js
+let valuesExpectedIndex = 0;
+if(!valueToTest) valuesExpectedIndex = 1;
+
+let valueToTransform = 0;
+values.forEach( (element, index) => {
+  valueToTransform = describes[valuesExpectedIndex].valuesExpected[index];
+  it('testando: '+element+' com '+valueToTransform,  () => {
+    let validated = require('./../'+testName+'/'+testName)(element);
+    if(valueToTest) expect(validated).to.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+    else expect(validated).to.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+  });
+});
 
 ```

@@ -12,4 +12,4 @@ const describes = [
   , valuesExpected: ['Suissa', 'Itacir']
   }
 ];
-require('./testModuleGeneric')('toLowerCase', describes);
+require('./testModuleGenericTESTE')('toLowerCase', describes);
