@@ -1974,6 +1974,176 @@ if(describes[0].list) {
 
 **Vai dizer que não ficou BEM MELHOR?**
 
+Porém olhe como está nosso módulo agora:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+module.exports = (testName, describes) => {
+
+  const itQuarkIs = (element, index, valueToTest) => {
+    it('testando: '+element,  () => {
+      let validated = require('./../'+testName+'/'+testName)(element);
+      expect(validated).to.deep.equal(valueToTest);
+    });
+  };
+  const testQuarkIs = (values, valueToTest) => {
+    values.forEach((element, index) => itQuarkIs(element, index, valueToTest));
+  };
+  const itQuarkTo = (element, index, valueToTest, valueConverted, valuesExpectedIndex) => {
+    it('testando: '+element+' com '+valueConverted,  () => {
+      let validated = require('./../'+testName+'/'+testName)(element);
+      if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+      else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+    });
+  };
+
+  const testQuarkTo = (values, valueToTest) => {
+    let valuesExpectedIndex = 0;
+    if(!valueToTest) valuesExpectedIndex = 1;
+    let valueConverted = 0;
+    values.forEach((element, index) => {
+      valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+      itQuarkTo(element, index, valueToTest, valueConverted, valuesExpectedIndex)
+    });
+  };
+
+  const itQuarkIsIn = (element, index, list, valueToTest) => {
+    it('testando: '+element,  () => {
+      let validated = require('./../'+testName+'/'+testName)(element, list);
+      expect(validated).to.equal(valueToTest);
+    });
+  };
+
+  let test = (values, valueToTest) => {
+    let isQuarkTo = (testName.indexOf('to') > -1);
+
+    if(isQuarkTo) testQuarkTo(values, valueToTest);
+    else testQuarkIs(values, valueToTest);
+  };
+
+
+  const testQuarkIsIn = (values, valueToTest, list) => {
+    values.forEach( (element, index) => {
+      itQuarkIsIn(element, index, list, valueToTest);
+    });
+  };
+
+  if(describes[0].list) {
+    const list = describes.splice(0,1)[0].list;
+    test = (values, valueToTest) => {
+      testQuarkIsIn(values, valueToTest, list);
+    };
+  }
+
+  describe(testName, () => {
+    describes.forEach( (element, index) => {
+      if(element.type) {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+      else {
+        console.log('aqui começa')
+        describe(element.message,  () => {
+          console.log('element.values', element.values)
+          console.log('element.type', element.type)
+          test(element.values, element.type);
+        });
+      }
+      if(element.list) return true;
+    });
+  });
+};
+
+```
+
+**Parece aqueles módulos Megazord!!!**
+
+Então precisamos fazer o que??
+
+**REFATORAR LÓGICO!!!** :p
+
+Vamos iniciar retirando algumas funções para módulos externos, começando pela `itQuarkIs`:
+
+```js
+const expect = require('chai').expect;
+
+module.exports = (element, index, valueToTest, testName) => {
+  it('testando: '+element,  () => {
+    let validated = require('./../../'+testName+'/'+testName)(element);
+    expect(validated).to.deep.equal(valueToTest);
+  });
+};
+```
+
+Utilizando assim:
+
+```js
+const itQuarkIs = require('./config/itQuarkIs');
+const testQuarkIs = (values, valueToTest) => {
+  values.forEach((element, index) => {
+    itQuarkIs(element, index, valueToTest, testName)
+  });
+};
+```
+
+Agora vamos para o `itQuarkTo`:
+
+```js
+const expect = require('chai').expect;
+
+module.exports = (element, index, valueToTest, valueConverted, valuesExpectedIndex, testName, describes) => {
+  it('testando: '+element+' com '+valueConverted,  () => {
+    let validated = require('./../../'+testName+'/'+testName)(element);
+    if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+    else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+  });
+}
+```
+
+Perceba que preciso passar 2 parâmetros, `testName, describes`, adicionais para funcionar ficando assim sua chamada:
+
+```js
+const itQuarkTo = require('./config/itQuarkTo');
+const testQuarkTo = (values, valueToTest) => {
+  let valuesExpectedIndex = 0;
+  if(!valueToTest) valuesExpectedIndex = 1;
+
+  let valueConverted = 0;
+  values.forEach((element, index) => {
+    valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+    itQuarkTo(element, index, valueToTest, valueConverted, valuesExpectedIndex, testName, describes)
+  });
+};
+```
+
+Agora separamos o `itQuarkIsIn`:
+
+```js
+const expect = require('chai').expect;
+
+module.exports = (element, index, list, valueToTest, testName) => {
+  it('testando: '+element,  () => {
+    let validated = require('./../../'+testName+'/'+testName)(element, list);
+    expect(validated).to.equal(valueToTest);
+  });
+};
+```
+
+Ficando assim:
+
+```js
+const itQuarkIsIn = require('./config/itQuarkIsIn');
+const testQuarkIsIn = (values, valueToTest, list) => {
+  values.forEach( (element, index) => {
+    itQuarkIsIn(element, index, list, valueToTest, testName);
+  });
+};
+```
+
 
 
 

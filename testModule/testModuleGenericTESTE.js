@@ -4,37 +4,21 @@ const expect = require('chai').expect;
 
 module.exports = (testName, describes) => {
 
-  const itQuarkIs = (element, index, valueToTest) => {
-    it('testando: '+element,  () => {
-      let validated = require('./../'+testName+'/'+testName)(element);
-      expect(validated).to.deep.equal(valueToTest);
-    });
-  };
+  const itQuarkIs = require('./config/itQuarkIs');
   const testQuarkIs = (values, valueToTest) => {
-    values.forEach((element, index) => itQuarkIs(element, index, valueToTest));
-  };
-  const itQuarkTo = (element, index, valueToTest, valueConverted, valuesExpectedIndex) => {
-    it('testando: '+element+' com '+valueConverted,  () => {
-      let validated = require('./../'+testName+'/'+testName)(element);
-      if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
-      else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+    values.forEach((element, index) => {
+      itQuarkIs(element, index, valueToTest, testName)
     });
   };
 
+  const itQuarkTo = require('./config/itQuarkTo');
   const testQuarkTo = (values, valueToTest) => {
     let valuesExpectedIndex = 0;
     if(!valueToTest) valuesExpectedIndex = 1;
     let valueConverted = 0;
     values.forEach((element, index) => {
       valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
-      itQuarkTo(element, index, valueToTest, valueConverted, valuesExpectedIndex)
-    });
-  };
-
-  const itQuarkIsIn = (element, index, list, valueToTest) => {
-    it('testando: '+element,  () => {
-      let validated = require('./../'+testName+'/'+testName)(element, list);
-      expect(validated).to.equal(valueToTest);
+      itQuarkTo(element, index, valueToTest, valueConverted, valuesExpectedIndex, testName, describes)
     });
   };
 
@@ -45,10 +29,10 @@ module.exports = (testName, describes) => {
     else testQuarkIs(values, valueToTest);
   };
 
-
+  const itQuarkIsIn = require('./config/itQuarkIsIn');
   const testQuarkIsIn = (values, valueToTest, list) => {
     values.forEach( (element, index) => {
-      itQuarkIsIn(element, index, list, valueToTest);
+      itQuarkIsIn(element, index, list, valueToTest, testName);
     });
   };
 
