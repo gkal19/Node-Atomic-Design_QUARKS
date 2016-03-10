@@ -54,7 +54,7 @@ Para facilitar o reuso eu separei os Quarks puros dos especificos para o Mongoos
 Então no caso eu uso o Quark isEmptyString que utiliza os Quarks isEmpty e isString:
 
 ```js
-// notEmptyString
+// isEmptyString
 'use strict';
 
 module.exports = (value) => {
@@ -71,8 +71,6 @@ Que por sua vez usa 2 outros Quarks:
 
 ```js
 // isEmpty
-'use strict';
-
 module.exports = (value) => {
   const isNull = (value === null);
   const isUndefined = (value === undefined);
@@ -80,14 +78,14 @@ module.exports = (value) => {
   if (isNull || isUndefined || isEmpty) return true;
   return false;
 }
-
 ```
 
 ```js
-// isOnlyLetters
-'use strict';
-
-module.exports = (value) => /[a-zA-Z]+/g.test(value);
+// isString
+module.exports = (value) => {
+  if (typeof value === 'string' || value instanceof String) return true;
+  return false;
+}
 ```
 
 Dessa forma podemos criar Quarks mais complexos apenas agregando Quarks menores.
@@ -99,7 +97,7 @@ Basicamente separamos os Quarks em 2 tipos:
 - Modificadores: to{Name}
 - Respondedores: is{Name}
 
-Porém ainda temos mais 1 tipo especial que é para validação do Mongoose.
+Porém ainda temos outros tipos especiais como de validação do Mongoose.
 
 
 ### to{Name}
@@ -120,8 +118,10 @@ Um Quark básico para validação deverá retornar **APENAS** 1 valor booleano (
 Devemos começar com os Quarks que devem responder alguma pergunta simples, por exemplo:
 
 - isEmpty
-- isOnlyLetters
-- isOnlyNumbers
+- isString
+- isNumber
+- isDate
+- isBool
 - etc
 
 Nesse caso o padrão de módulo para esse tipo de Quark é:
@@ -143,12 +143,27 @@ Vamos pegar o exemplo do `isEmpty`:
 'use strict';
 
 module.exports = (value) => {
-  if (value === null || value === undefined) return true;
+  if (value === null || value === undefined || value === '') return true;
   return false;
 }
 ```
 
-Agora podemos criar Quarks mais *complexos* reusando esse Quark toda vez que precisemos garantir que um valor não seja nem `null` nem `undefined`, ou seja, praticamente em todos os Átomos que definam `required: true`.
+Mas podemos refatorar esse código dessa forma:
+
+```js
+// isEmpty
+'use strict';
+
+module.exports = (value) => {
+  const isNull = (value === null);
+  const isUndefined = (value === undefined);
+  const isEmpty = (value === '');
+  if (isNull || isUndefined || isEmpty) return true;
+  return false;
+}
+```
+
+Agora podemos criar Quarks mais *complexos* reusando esse Quark toda vez que precisemos garantir que um valor não seja nem `null` nem `undefined` nem `''`, ou seja, praticamente em todos os Átomos que definam `required: true`.
 
 Vamos criar, como exemplo, o Quark `isNotEmptyMoney` que além de testar se não é vazio também deve verificar se o valor é maior que `0`, pois se for `0` será nossa definição de `dinheiro vazio`:
 
@@ -199,7 +214,18 @@ Coloquei um `if` dentro do outro para exemplificar melhor, agora adicionamos o Q
 'use strict';
 
 module.exports = (value) => {
-  if(!isNaN(parseFloat(value)) && isFinite(value) && value > 0) return true;
+  if(!isNaN(value)) return true;
+  return false;
+};
+```
+
+Criamos uma validação bem simples que testa se o `value` não é um `NaN`, que significa `Not a Number`, logo se for falso para `isNaN(value)` o `value` é um número, porém podemos garantir melhor com mais um teste, verificar se é um número finito:
+
+```js
+'use strict';
+
+module.exports = (value) => {
+  if(!isNaN(parseFloat(value)) && isFinite(value)) return true;
   return false;
 };
 ```
@@ -217,10 +243,9 @@ module.exports = {
 };
 ```
 
-Dessa forma separamos todas as funções reusáveis do nosso sistema, pois uma vez criada **qualquer função** ela deverá ser apenas usada.
+Dessa forma separamos todas as funções reusáveis do nosso sistema, pois uma vez criada **qualquer função** deverá ser apenas usada.
 
-
-### {Name}Validate
+### {Name}MongooseValidate
 
 Como já visto anteriormente o padrão para o Quark de validação do Mongoose é:
 
@@ -286,11 +311,11 @@ Depois deles podemos listar alguns Quarks específicos para campos:
 
 Todos eles usarão os Quarks base internamente.
 
-## TDD
+## Testes
 
 Como devemos testar nossos Quarks?
 
-Para isso vamos utiliar o Chai com `expect` que foi ensinado [na aula 9](https://www.youtube.com/watch?v=OCB7jMZBIas).
+Para isso vamos utilizar o Chai com `expect` que foi ensinado [na aula 9](https://www.youtube.com/watch?v=OCB7jMZBIas).
 
 Vamos entender como escrever 1 teste com ele:
 
@@ -333,7 +358,7 @@ describe('não é String',  () => {
 });
 ```
 
-Para rodar esse teste basta executar:
+Para rodar esse teste basta executar `mocha isString/isString.test.js`:
 
 ```
 mocha isString/isString.test.js
@@ -633,7 +658,7 @@ const test = (values, valueToTest) => {
 const describes = [
   {type: true, message: 'é String', test: test}
 , {type: false, message: 'não é String', test: test}
-]
+];
 ```
 
 Então em 1 objeto nós temos:
