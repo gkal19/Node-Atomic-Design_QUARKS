@@ -51,35 +51,36 @@ module.exports = {
 
 Para facilitar o reuso eu separei os Quarks puros dos especificos para o Mongoose, pois o Quark do Mongose tem uma estrutura diferente do Quarks básico, os nossos Quarks não possuem o campo de mensagem, por exemplo.
 
-Então no caso eu uso o Quark `notEmptyStringValidate` que utiliza o Quark `notEmptyString`:
+Então no caso eu uso o Quark isEmptyString que utiliza os Quarks isEmpty e isString:
 
 ```js
 // notEmptyString
 'use strict';
 
-module.exports = {
-  validate: (value) => {
-    const validated = require('./notEmpty')(value)
-    if (!validated) return false;
+module.exports = (value) => {
+  const isEmpty = require('../isEmpty')(value)
+  const isString = require('../../isString/isString')(value)
 
-    const isOnlyLetters = require('./isOnlyLetters')(value);
-    if (!isOnlyLetters) return false;
+  if (isEmpty && isString) return true;
 
-    return true;
-  }
+  return false;
 };
 ```
 
 Que por sua vez usa 2 outros Quarks:
 
 ```js
-// notEmpty
+// isEmpty
 'use strict';
 
 module.exports = (value) => {
-  if (value === null || value === undefined) return false;
-  return true;
+  const isNull = (value === null);
+  const isUndefined = (value === undefined);
+  const isEmpty = (value === '');
+  if (isNull || isUndefined || isEmpty) return true;
+  return false;
 }
+
 ```
 
 ```js
