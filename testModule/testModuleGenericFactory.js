@@ -9,6 +9,7 @@ module.exports = (testName, describes) => {
 
   let findTest = (element) => {
     let regex = new RegExp(element, 'i');
+    console.log('regex:', testName.match(regex))
     if(!!testName.match(regex)){
       testQuark = require('./config/testQuark'+element);
       return element;

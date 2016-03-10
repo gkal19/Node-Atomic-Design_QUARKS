@@ -2265,5 +2265,43 @@ module.exports = ['Is', 'IsIn', 'To'];
 
 Agora vamos criar a mesma lógica da chamada dos *Quarks* porém de uma forma genérica para que ela fique aberta para expansão e fechada para modificações, remetendo ao *Open Closed Principle (OCP)* do [S.O.L.I.D.](https://en.wikipedia.org/wiki/SOLID_(object-oriented_design)).
 
+Como já temos o *array* com os tipos de testes, iremos filtrar qual é o teste requisitado já importando seu módulo:
+
+```js
+const testTypes = require('./config/testTypesFactory');
+let testQuark = null;
+
+let findTest = (element) => {
+  let regex = new RegExp(element, 'i');
+  if(!!testName.match(regex)){
+    testQuark = require('./config/testQuark'+element);
+    return element;
+  }
+};
+
+let testQuarkArr = testTypes.filter(findTest);
+```
+
+Na função `findTest`, que é usado no `filter`, eu crio uma expressão regular, `new RegExp(element, 'i')`, para verificar se esse valor existe no nome do teste,`testName`, passado para o nosso módulo.
+
+Mas perceba que estou usando uma safadeza ali:
+
+```js
+!!testName.match(regex)
+```
+
+Isso acontece porque o resultado do `match` é esse, caso eu teste *Quark isIn*:
+
+```js
+[ 'is', index: 0, input: 'isInArray' ]
+[ 'isIn', index: 0, input: 'isInArray' ]
+null
+```
+
+Então se eu **NEGAR** um *array* ele irá virar `false` então se eu negar novamente ele irá virar o que?
+
+> TRUUUUUUUUUUU!!!
+
+![](https://cldup.com/4-iEGDbDSG-2000x2000.jpeg)
 
 
