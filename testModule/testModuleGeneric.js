@@ -19,7 +19,6 @@ const testQuarkIsIn = (testName, element, list, valueToTest) => {
 };
 
 // Definimos os tipos de testes
-// SEMPRE dos mais específicos para os mais básicos
 const typesTest = require('./config/testTypes');
 
 
@@ -46,7 +45,6 @@ module.exports = (testName, describes) => {
     else testQuarkIs.test(testName, values, valueToTest, describes);
   };
 
-  // Corrigir esse teste
   if(isTestIsIn) {
     if(describes[0].list) {
       const list = describes.splice(0,1)[0].list;
