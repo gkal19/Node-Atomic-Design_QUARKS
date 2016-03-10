@@ -11,4 +11,4 @@ const describes = [
   , values: ['null', undefined, 1, true, {}, ()=>{}]
   }
 ];
-require('./testModuleGeneric')('isString', describes);
+require('./testModuleGenericTESTE')('isString', describes);

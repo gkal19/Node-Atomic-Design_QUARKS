@@ -11,4 +11,4 @@ const describes = [
   , values: ['vai corintia!', null, undefined, 1, true, {}, ()=>{}]
   }
 ];
-require('./testModuleGeneric')('isInArray', describes);
+require('./testModuleGenericTESTE')('isInArray', describes);

@@ -1775,7 +1775,7 @@ Passando essa lógica para a função `testQuarkIs`:
 const testQuarkIs = (element, index) => {
   it('testando: '+element,  () => {
     let validated = require('./../'+testName+'/'+testName)(element);
-    expect(validated).to.equal(valueToTest);
+    expect(validated).to.deep.equal(valueToTest);
   });
 };
 ```
@@ -1849,6 +1849,130 @@ if(testName.indexOf('to') > -1){
 }
 ```
 
+**Tá mas então como faremos para encapsular toda essa lógica e deixar assim?**
+
+```js
+if(testName.indexOf('to') > -1){
+  testQuarkTo(values, valueToTest);
+}
+```
+
+**SIMPLES!!!**
+
+Basta encapsular a porra toda passando os mesmos parâmetros que chegam em `test`:
+
+```js
+const testQuarkTo = (values, valueToTest) => {
+  let valuesExpectedIndex = 0;
+  if(!valueToTest) valuesExpectedIndex = 1;
+  let valueConverted = 0;
+  values.forEach((element, index) => {
+    valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+    itQuarkTo(element, index, valueToTest, valueConverted, valuesExpectedIndex)
+  });
+};
+```
+
+**Ridicularmente simples né?**
+
+Bom se fizemos isso com essa lógica podemos facilmente fazer o mesmo para o *Quark is*:
+
+```js
+const itQuarkIs = (element, index, valueToTest) => {
+  it('testando: '+element,  () => {
+    let validated = require('./../'+testName+'/'+testName)(element);
+    expect(validated).to.deep.equal(valueToTest);
+  });
+};
+const testQuarkIs = (values, valueToTest) => {
+  values.forEach((element, index) => itQuarkIs(element, index, valueToTest));
+};
+```
+
+***Mudei todos os to.equal para to.deep.equal!***
+
+Olhe como ficou a função `test` agora:
+
+```js
+let test = (values, valueToTest) => {
+  if(testName.indexOf('to') > -1){
+    testQuarkTo(values, valueToTest);
+  }
+  else {
+    testQuarkIs(values, valueToTest);
+  }
+};
+```
+
+Separando a verificação se o teste é do tipo `to`:
+
+```js
+let test = (values, valueToTest) => {
+  let isQuarkTo = (testName.indexOf('to') > -1);
+
+  if(isQuarkTo) testQuarkTo(values, valueToTest);
+  else testQuarkIs(values, valueToTest);
+};
+```
+
+Já melhorou porém ainda temos uma parte que nao refatoramos nada, o teste do tipo `isIn`:
+
+```js
+if(describes[0].list) {
+  const list = describes.splice(0,1)[0].list;
+  test = (values, valueToTest) => {
+    values.forEach( (element) => {
+      it('testando: '+element,  () => {
+        let validated = require('./../'+testName+'/'+testName)(element, list);
+        expect(validated).to.equal(valueToTest);
+      });
+    });
+  };
+}
+```
+
+Separamos inicialmente seu `it`:
+
+```js
+const itQuarkIsIn = (element, index, list, valueToTest) => {
+  it('testando: '+element,  () => {
+    let validated = require('./../'+testName+'/'+testName)(element, list);
+    expect(validated).to.equal(valueToTest);
+  });
+};
+```
+
+Ficando assim:
+
+```js
+if(describes[0].list) {
+  const list = describes.splice(0,1)[0].list;
+  test = (values, valueToTest) => {
+    values.forEach( (element, index) => {
+      itQuarkIsIn(element, index, list, valueToTest);
+    });
+  };
+}
+```
+
+Agora basta encapsular o que tem dentro da função `test`:
+
+```js
+const testQuarkIsIn = (values, valueToTest, list) => {
+  values.forEach( (element, index) => {
+    itQuarkIsIn(element, index, list, valueToTest);
+  });
+};
+
+if(describes[0].list) {
+  const list = describes.splice(0,1)[0].list;
+  test = (values, valueToTest) => {
+    testQuarkIsIn(values, valueToTest, list);
+  };
+}
+```
+
+**Vai dizer que não ficou BEM MELHOR?**
 
 
 
