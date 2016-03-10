@@ -196,12 +196,11 @@ Então sabemos que para adicionar outra validação basta fazer a mesma coisa da
 
 module.exports = (value) => {
   // validação base
-  let validated = require('./isEmpty')(value)
-  if (validated) return true;
+  let isEmpty = require('./isEmpty')(value)
   // validação se é Number
   // validação se maior que 0
-  validated = require('./isNumber')(value)
-  if(validated) {
+  isNumber = require('./isNumber')(value)
+  if(!isEmpty && isNumber) {
      if(value > 0) return true;
   }
   return false;
@@ -2046,10 +2045,7 @@ module.exports = (testName, describes) => {
         });
       }
       else {
-        console.log('aqui começa')
         describe(element.message,  () => {
-          console.log('element.values', element.values)
-          console.log('element.type', element.type)
           test(element.values, element.type);
         });
       }
@@ -2144,7 +2140,91 @@ const testQuarkIsIn = (values, valueToTest, list) => {
 };
 ```
 
+Agora vem o mais complicado, iremos modularizar as funções `testQuark` começando pela `testQuarkIs`:
 
+```js
+const itQuarkIs = require('./itQuarkIs');
 
+module.exports = (values, valueToTest, testName) => {
+  values.forEach((element, index) => {
+    itQuarkIs(element, index, valueToTest, testName)
+  });
+};
+
+// chamada testQuarkIs(values, valueToTest, testName);
+```
+
+Agora o `testQuarkTo`:
+
+```js
+const itQuarkTo = require('./itQuarkTo');
+
+module.exports = (values, valueToTest, testName, describes) => {
+  let valuesExpectedIndex = 0;
+  if(!valueToTest) valuesExpectedIndex = 1;
+  let valueConverted = 0;
+  values.forEach((element, index) => {
+    valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+    itQuarkTo(element, index, valueToTest, valueConverted, valuesExpectedIndex, testName, describes)
+  });
+};
+```
+
+Finalizando com o `testQuarkIsIn`:
+
+```js
+const itQuarkIsIn = require('./itQuarkIsIn');
+
+module.exports = (values, valueToTest, list, testName) => {
+  values.forEach( (element, index) => {
+    itQuarkIsIn(element, index, list, valueToTest, testName);
+  });
+};
+```
+
+Deixando nosso código muito mais legível:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+module.exports = (testName, describes) => {
+
+  const testQuarkIs = require('./config/testQuarkIs');
+  const testQuarkTo = require('./config/testQuarkTo');
+  const testQuarkIsIn = require('./config/testQuarkIsIn');
+
+  let test = (values, valueToTest) => {
+    let isQuarkTo = (testName.indexOf('to') > -1);
+
+    if(isQuarkTo) testQuarkTo(values, valueToTest, testName, describes);
+    else testQuarkIs(values, valueToTest, testName);
+  };
+
+  if(describes[0].list) {
+    const list = describes.splice(0,1)[0].list;
+    test = (values, valueToTest) => {
+      testQuarkIsIn(values, valueToTest, list, testName);
+    };
+  }
+
+  describe(testName, () => {
+    describes.forEach( (element, index) => {
+      if(element.type) {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+      else {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+      if(element.list) return true;
+    });
+  });
+};
+```
 
 

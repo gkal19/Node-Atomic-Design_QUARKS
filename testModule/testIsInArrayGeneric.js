@@ -8,7 +8,7 @@ const describes = [
   }
 , { type: false
   , message: 'não está array'
-  , values: ['vai corintia!', null, undefined, 1, true, {}, ()=>{}]
+  , values: ['suissa', null, undefined, 1, true, {}, ()=>{}]
   }
 ];
 require('./testModuleGenericTESTE')('isInArray', describes);
