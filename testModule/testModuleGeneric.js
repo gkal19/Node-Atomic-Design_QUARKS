@@ -22,15 +22,6 @@ const testQuarkIsIn = (testName, element, list, valueToTest) => {
 // SEMPRE dos mais específicos para os mais básicos
 const typesTest = require('./config/testTypes');
 
-const isTestTo = (typeTest) => {
-  return typeTest === 'to';
-};
-const isTestIs = (typeTest) => {
-  return typeTest === 'is';
-};
-const isTestIsIn = (typeTest) => {
-  return typeTest === 'isIn';
-};
 
 module.exports = (testName, describes) => {
 
@@ -44,14 +35,19 @@ module.exports = (testName, describes) => {
   // Pego apenas o primeiro pois ele eh mais específico
   // Ja que com isIN ele acha tanto isIn como is
   // Sendo esse o retorno [ 'isIn', 'is' ]
-  let typeTest = defineTypeTest(testName, typesTest)[0];
+  let typeToTest = defineTypeTest(testName, typesTest)[0];
+
+  const isTestTo = require('./config/isTest')(typeToTest, 'to');
+  const isTestIs = require('./config/isTest')(typeToTest, 'is');
+  const isTestIsIn = require('./config/isTest')(typeToTest, 'isIn');
+
   let test = (values, valueToTest) => {
-    if(isTestTo(typeTest)) testQuarkTo.test(testName, values, valueToTest, describes);
+    if(isTestTo) testQuarkTo.test(testName, values, valueToTest, describes);
     else testQuarkIs.test(testName, values, valueToTest, describes);
   };
 
   // Corrigir esse teste
-  if(isTestIsIn(typeTest)) {
+  if(isTestIsIn) {
     if(describes[0].list) {
       const list = describes.splice(0,1)[0].list;
       test = (values, valueToTest) => {
