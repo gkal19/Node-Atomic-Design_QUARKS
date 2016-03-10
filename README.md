@@ -2303,3 +2303,48 @@ Então se eu **NEGAR** um *array* ele irá virar `false` então se eu negar nova
 
 ![](https://cldup.com/4-iEGDbDSG-2000x2000.jpeg)
 
+Após isso precisamos refatorar a chamada dos `testQuark{TYPE}`:
+
+```js
+let test = (values, valueToTest) => {
+  let isQuarkTo = (testName.indexOf('to') > -1);
+
+  if(isQuarkTo) testQuarkTo(values, valueToTest, testName, describes);
+  else testQuarkIs(values, valueToTest, testName);
+};
+
+if(describes[0].list) {
+  const list = describes.splice(0,1)[0].list;
+  test = (values, valueToTest) => {
+    testQuarkIsIn(values, valueToTest, list, testName);
+  };
+}
+```
+
+**Olhe que malandragem vai rolar agora!!!**
+
+```js
+let test = (values, valueToTest) => {
+  if(isQuarkTo) testQuark(values, valueToTest, testName, describes);
+  else testQuark(values, valueToTest, testName);
+};
+if(describes[0].list) {
+  const list = describes.splice(0,1)[0].list;
+  test = (values, valueToTest) => {
+    testQuark(values, valueToTest, list, testName);
+  };
+}
+```
+
+Substituimos todas as chamadas dos testes de *Quark* para uma única função: `testQuark`.
+
+Perceba que as funções de `testQuark` possuem interfaces diferentes remetendo a mais um princípio do S.O.L.I.D. o Princípio da Segregação da Interface.
+
+> O princípio de segregação de interface diz o seguinte: se uma interface começa a engordar, devemos parti-la em diversas novas interfaces de tal modo que cada cliente só conheça aquilo que de fato lhe diz respeito.
+
+*fonte: [http://www.itexto.net/devkico/?p=1105](http://www.itexto.net/devkico/?p=1105)*
+
+**Estou citando alguns princípios de S.O.L.I.D. mesmo não estando usando OO clássica, porém estou adaptando-os.** Caso você não concorde eu agradeceria se você me explicasse o porquê.
+
+
+
