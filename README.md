@@ -1630,7 +1630,77 @@ if(testName.indexOf('to') > -1){
 }
 ```
 
-Agora vamos testar esse módulo forçando um erro:
+O código todo ficou assim:
+
+```js
+'use strict';
+
+const expect = require('chai').expect;
+
+module.exports = (testName, describes) => {
+  let test = (values, valueToTest) => {
+    if(testName.indexOf('to') > -1){
+
+      let valuesExpectedIndex = 0;
+      if(!valueToTest) valuesExpectedIndex = 1;
+      console.log('values', values)
+      let valueConverted = 0;
+      values.forEach( (element, index) => {
+        valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+        console.log('valueConverted', valueConverted);
+        it('testando: '+element+' com '+valueConverted,  () => {
+          let validated = require('./../'+testName+'/'+testName)(element);
+          if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+          else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+
+        });
+      });
+
+    }
+    else {
+      values.forEach( (element, index) => {
+        it('testando: '+element,  () => {
+          let validated = require('./../'+testName+'/'+testName)(element);
+          expect(validated).to.equal(valueToTest);
+        });
+      });
+    }
+  };
+  if(describes[0].list) {
+    const list = describes.splice(0,1)[0].list;
+    test = (values, valueToTest) => {
+      values.forEach( (element) => {
+        it('testando: '+element,  () => {
+          let validated = require('./../'+testName+'/'+testName)(element, list);
+          expect(validated).to.equal(valueToTest);
+        });
+      });
+    };
+  }
+
+  describe(testName, () => {
+    describes.forEach( (element, index) => {
+      if(element.type) {
+        describe(element.message,  () => {
+          test(element.values, element.type);
+        });
+      }
+      else {
+        console.log('aqui começa')
+        describe(element.message,  () => {
+          console.log('element.values', element.values)
+          console.log('element.type', element.type)
+          test(element.values, element.type);
+        });
+      }
+      if(element.list) return true;
+    });
+  });
+};
+```
+
+
+Vamos testar esse módulo forçando um erro no teste falso:
 
 ```js
 const describes = [
@@ -1648,3 +1718,35 @@ const describes = [
 require('./testModuleGenericTESTE')('toLowerCase', describes);
 ```
 
+Executando-o nos retornará isso:
+
+```
+  toLowerCase
+    to LOWER
+      ✓ testando: Suissa com suissa
+      ✓ testando: Itacir com itacir
+    não to LOWER
+      1) testando: Suissa com suissa
+      ✓ testando: Itacir com Itacir
+
+
+  3 passing (16ms)
+  1 failing
+
+  1) toLowerCase não to LOWER testando: Suissa com suissa:
+
+      AssertionError: expected 'suissa' to not deeply equal 'suissa'
+      + expected - actual
+
+
+      at Assertion.assertEqual (node_modules/chai/lib/chai/core/assertions.js:485:19)
+      at Assertion.ctx.(anonymous function) [as equal] (node_modules/chai/lib/chai/utils/addMethod.js:41:25)
+      at Context.<anonymous> (testModule/testModuleGenericTESTE.js:19:46)
+
+```
+
+Beleza nosso módulo já está OK para esse tipo de teste, mas **porra como ficou gigantesco!!!**
+
+> Então é hora do que?
+
+![](http://www.vemfestejar.com/Assets/Produtos/SuperZoom/kit-hora-de-aventura-gigante_635610670695592249.jpg)
