@@ -11,4 +11,4 @@ const describes = [
   , values: ['suissooa', null, undefined, 1, true, {}, ()=>{}]
   }
 ];
-require('./testModuleGenericTESTE')('isInArray', describes);
+require('./testModuleGenericFactory')('isInArray', describes);

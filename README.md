@@ -201,14 +201,23 @@ module.exports = (value) => {
   // validação se é Number
   // validação se maior que 0
   isNumber = require('./isNumber')(value)
-  if(isNumber) {
-     if(value > 0) return true;
-  }
+  if(!isNumber) return false;
+  if(value > 0) return true;
   return false;
 };
 ```
 
-Coloquei um `if` dentro do outro para exemplificar melhor, agora adicionamos o Quark novo `isNumber` que ainda não existe, então vamos criá-lo:
+Vizualize comigo a lógica padrão dos nossos testes:
+
+1. **SEMPRE** testar se é vazio
+2. Se for vazio já retorna `false` para não precisar testar o resto
+3. Se não for você irá testar o tipo do valor
+4. Se não for do tipo esperado já pode retornar `false`
+5. Caso passe por esses teste você irá validar a regra de negócio
+6. Se for verdadeira pode retornar `true`
+7. Se não entrar em nenhum `if` finaliza retornando `false`
+
+Agora adicionamos o Quark novo `isNumber` que ainda não existe, então vamos criá-lo:
 
 ```js
 'use strict';
@@ -1260,7 +1269,7 @@ else {
       });
     });
   };
-}
+} 
 ```
 
 Porém não precisamos desse `else`, consegue ver como ficará?
@@ -2227,5 +2236,34 @@ module.exports = (testName, describes) => {
   });
 };
 ```
+
+
+## Mais refatoração
+
+O código até que está legal mas eu ainda acho que dá para melhorar, então vamos lá.
+
+Primeira coisa que iremos refatorar é chamada dos *Quarks* de teste:
+
+```js
+const testQuarkIs = require('./config/testQuarkIs');
+const testQuarkTo = require('./config/testQuarkTo');
+const testQuarkIsIn = require('./config/testQuarkIsIn');
+```
+
+Então vamos analisar e retirar um padrão desse código:
+
+```js
+const testQuark{TYPE} = require('./config/testQuark{TYPE}');
+```
+
+Vamos agrupar o `{TYPE}` em um *array* pois assim poderemos adicionar mais tipos de testes futuramente, então já vamos aproveitar e deixar esse array em módulo separado:
+
+```js
+
+module.exports = ['Is', 'IsIn', 'To'];
+```
+
+Agora vamos criar a mesma lógica da chamada dos *Quarks* porém de uma forma genérica para que ela fique aberta para expansão e fechada para modificações, remetendo ao *Open Closed Principle (OCP)* do [S.O.L.I.D.](https://en.wikipedia.org/wiki/SOLID_(object-oriented_design)).
+
 
 

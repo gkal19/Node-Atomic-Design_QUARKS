@@ -6,10 +6,6 @@ const testQuarkTo = require('./testAtomicQuarkTo');
 const testQuarkIs = require('./testAtomicQuarkIs');
 
 
-// const testQuarkENUM = (testName, element, list, valueToTest) => {
-//   let validated = require('./../'+testName+'/'+testName)(element, list);
-//   expect(validated).to.equal(valueToTest);
-// };
 
 const testQuarkIsIn = (testName, element, list, valueToTest) => {
   it('testando: '+element,  () => {
@@ -34,6 +30,8 @@ module.exports = (testName, describes) => {
   // Pego apenas o primeiro pois ele eh mais específico
   // Ja que com isIN ele acha tanto isIn como is
   // Sendo esse o retorno [ 'isIn', 'is' ]
+  const typesTest = require('./config/testTypes');
+
   let typeToTest = defineTypeTest(testName, typesTest)[0];
 
   const isTestTo = require('./config/isTest')(typeToTest, 'to');
