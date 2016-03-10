@@ -197,6 +197,7 @@ Então sabemos que para adicionar outra validação basta fazer a mesma coisa da
 module.exports = (value) => {
   // validação base
   let isEmpty = require('./isEmpty')(value)
+  if (isEmpty) return false;
   // validação se é Number
   // validação se maior que 0
   isNumber = require('./isNumber')(value)
