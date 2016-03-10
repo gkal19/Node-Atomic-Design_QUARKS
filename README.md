@@ -1750,3 +1750,7 @@ Beleza nosso módulo já está OK para esse tipo de teste, mas **porra como fico
 > Então é hora do que?
 
 ![](http://www.vemfestejar.com/Assets/Produtos/SuperZoom/kit-hora-de-aventura-gigante_635610670695592249.jpg)
+
+> **HORA DA REFATORAÇÃO!**
+
+
