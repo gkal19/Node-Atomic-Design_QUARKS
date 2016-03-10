@@ -1715,7 +1715,7 @@ const describes = [
   , valuesExpected: ['suissa', 'Itacir']
   }
 ];
-require('./testModuleGenericTESTE')('toLowerCase', describes);
+require('./testModuleGeneric')('toLowerCase', describes);
 ```
 
 Executando-o nos retornará isso:
@@ -1741,7 +1741,7 @@ Executando-o nos retornará isso:
 
       at Assertion.assertEqual (node_modules/chai/lib/chai/core/assertions.js:485:19)
       at Assertion.ctx.(anonymous function) [as equal] (node_modules/chai/lib/chai/utils/addMethod.js:41:25)
-      at Context.<anonymous> (testModule/testModuleGenericTESTE.js:19:46)
+      at Context.<anonymous> (testModule/testModuleGeneric.js:19:46)
 
 ```
 
@@ -1752,5 +1752,105 @@ Beleza nosso módulo já está OK para esse tipo de teste, mas **porra como fico
 ![](http://www.vemfestejar.com/Assets/Produtos/SuperZoom/kit-hora-de-aventura-gigante_635610670695592249.jpg)
 
 > **HORA DA REFATORAÇÃO!**
+
+
+Primeira coisa que devemos fazer é encapuslar as lógicas em funções.
+
+Vamos começar pelo teste do *Quark is*:
+
+```js
+else {
+  values.forEach( (element, index) => {
+    it('testando: '+element,  () => {
+      let validated = require('./../'+testName+'/'+testName)(element);
+      expect(validated).to.equal(valueToTest);
+    });
+  });
+}
+```
+
+Passando essa lógica para a função `testQuarkIs`:
+
+```js
+const testQuarkIs = (element, index) => {
+  it('testando: '+element,  () => {
+    let validated = require('./../'+testName+'/'+testName)(element);
+    expect(validated).to.equal(valueToTest);
+  });
+};
+```
+
+Deixando o `else` assim:
+
+```js
+
+else {
+  values.forEach( (element, index) => {
+    testQuarkIs(element, index);
+  });
+}
+```
+
+Melhorando mais um pouco:
+
+```js
+else {
+  values.forEach(testQuarkIs);
+}
+```
+
+**Lindão né?** 
+
+Agora vamos para o teste do *Quark to*:
+
+```js
+if(testName.indexOf('to') > -1){
+
+  let valuesExpectedIndex = 0;
+  if(!valueToTest) valuesExpectedIndex = 1;
+  let valueConverted = 0;
+  values.forEach( (element, index) => {
+    valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+    console.log('valueConverted', valueConverted);
+    it('testando: '+element+' com '+valueConverted,  () => {
+      let validated = require('./../'+testName+'/'+testName)(element);
+      if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+      else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+
+    });
+  });
+
+}
+```
+
+Passamos sua lógica inicialmente para a função `itQuarkTo`:
+
+```js
+const itQuarkTo = (element, index, valueToTest, valueConverted, valuesExpectedIndex) => {
+  it('testando: '+element+' com '+valueConverted,  () => {
+    let validated = require('./../'+testName+'/'+testName)(element);
+    if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+    else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+  });
+};
+```
+
+Pois dentro do `forEach` não usamos apenas `element, index` por isso ainda não podemos fazer como a função `testQuarkIs`:
+
+```js
+if(testName.indexOf('to') > -1){
+  let valuesExpectedIndex = 0;
+  if(!valueToTest) valuesExpectedIndex = 1;
+  let valueConverted = 0;
+  values.forEach((element, index) => {
+    valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
+    itQuarkTo(element, index, valueToTest, valueConverted, valuesExpectedIndex)
+  });
+}
+```
+
+
+
+
 
 

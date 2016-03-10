@@ -8,7 +8,7 @@ const describes = [
 , 
   { type: false
   , message: 'não é String'
-  , values: [null, undefined, 1, true, {}, ()=>{}]
+  , values: ['null', undefined, 1, true, {}, ()=>{}]
   }
 ];
 require('./testModuleGeneric')('isString', describes);

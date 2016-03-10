@@ -3,32 +3,34 @@
 const expect = require('chai').expect;
 
 module.exports = (testName, describes) => {
+
+  const testQuarkIs = (element, index) => {
+    it('testando: '+element,  () => {
+      let validated = require('./../'+testName+'/'+testName)(element);
+      expect(validated).to.equal(valueToTest);
+    });
+  };
+  const itQuarkTo = (element, index, valueToTest, valueConverted, valuesExpectedIndex) => {
+    it('testando: '+element+' com '+valueConverted,  () => {
+      let validated = require('./../'+testName+'/'+testName)(element);
+      if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+      else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
+    });
+  };
+
   let test = (values, valueToTest) => {
     if(testName.indexOf('to') > -1){
-
       let valuesExpectedIndex = 0;
       if(!valueToTest) valuesExpectedIndex = 1;
-      console.log('values', values)
       let valueConverted = 0;
-      values.forEach( (element, index) => {
+      values.forEach((element, index) => {
         valueConverted = describes[valuesExpectedIndex].valuesExpected[index];
-        console.log('valueConverted', valueConverted);
-        it('testando: '+element+' com '+valueConverted,  () => {
-          let validated = require('./../'+testName+'/'+testName)(element);
-          if(valueToTest) expect(validated).to.deep.equal(describes[valuesExpectedIndex].valuesExpected[index]);
-          else expect(validated).to.deep.not.equal(describes[valuesExpectedIndex].valuesExpected[index]);
-
-        });
+        itQuarkTo(element, index, valueToTest, valueConverted, valuesExpectedIndex)
       });
 
     }
     else {
-      values.forEach( (element, index) => {
-        it('testando: '+element,  () => {
-          let validated = require('./../'+testName+'/'+testName)(element);
-          expect(validated).to.equal(valueToTest);
-        });
-      });
+      values.forEach(testQuarkIs);
     }
   };
   if(describes[0].list) {
