@@ -20,7 +20,7 @@ const testQuarkIsIn = (testName, element, list, valueToTest) => {
 
 // Definimos os tipos de testes
 // SEMPRE dos mais específicos para os mais básicos
-const typesTest = ['isIn', 'is', 'to'];
+const typesTest = require('./config/testTypes');
 
 const isTestTo = (typeTest) => {
   return typeTest === 'to';
@@ -46,7 +46,6 @@ module.exports = (testName, describes) => {
   // Sendo esse o retorno [ 'isIn', 'is' ]
   let typeTest = defineTypeTest(testName, typesTest)[0];
   let test = (values, valueToTest) => {
-    // console.log('values aqui', values);
     if(isTestTo(typeTest)) testQuarkTo.test(testName, values, valueToTest, describes);
     else testQuarkIs.test(testName, values, valueToTest, describes);
   };
