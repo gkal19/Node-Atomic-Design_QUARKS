@@ -941,29 +941,121 @@ Agora chegamos a um impasse, sabe porquê?
 
 Sim imagine que nossa função a ser testada não receba apenas 1 valor, mas sim 2!
 
-Vou pegar um exemplo nosso, o `isEnum`.
+Vou pegar um exemplo nosso, o `isInArray`.
 
 ```js
 'use strict';
 
 module.exports = (value, list) => {
 
-  const isEnum = require('./createIsEnum')(list)
+  const isIn = require('./createIsIn')(list)
 
-  const validated = isEnum(value);
+  const validated = isIn(value);
   if (validated) return true;
 
   return false;
 };
 ```
 
-> Por que o isEnum recebe 2 valores e não apenas 1 como os outros?
+Que usa o `createIsIn`:
 
-Bom é bem simples, primeiro você precisa entender o que é o `ENUM`.
+```js
+'use strict';
+
+module.exports = (list) => (value) => !(list.indexOf(value) === -1);
+```
+
+> Por que o isInArray recebe 2 valores e não apenas 1 como os outros?
+
+Bom é bem simples, primeiro você precisa entender o que é o `isIn`.
 
 Ele é basicamente uma lista de valores onde para um valor ser aceito ele **precisa obrigatoriamente** existir nessa lista.
 
 Ou seja, para testarmos essa funcionalidade precisamos passar o valor a ser testado e a lista de valores aceitáveis, correto?
+
+Por isso estamos o `createIsIn` que irá receber essa lista, no caso o *array* e irá retornar um valor **booleano** caso o `value` exista em alguma posição de `list`.
+
+Como a função `indexOf` irá retornar a posição em que encontrou o `value` e caso não encontre ele retorna `-1`, por isso testamos se o resultado é igual a `-1`, pois se ele não achar e for igual a `-1` irá resultar em verdadeiro certo?
+
+Por isso que **negamos** esse resultado com `!` para que retorne verdadeiro apenas se esse teste `ist.indexOf(value) === -1` for falso. Simples não?
+
+Com isso podemos usar o retorno desse módulo para validar se um valor se encontra no *array*:
+
+```js
+const isIn = require('./createIsIn')(list)
+
+const validated = isIn(value);
+if (validated) return true;
+```
+
+Mas se você perceber passamos apenas o `list` para esse módulo então como ele consegue testar o `value`?
+
+Analise comigo o `createIsIn`:
+
+```js
+module.exports = (list) => (value) => !(list.indexOf(value) === -1);
+```
+
+Esse código diz que meu módulo é uma função que recebe `list` como parâmetro para ele ser construido:
+
+```js
+module.exports = (list) => {};
+```
+
+E essa funçao irá retornar **outra função** que recebe `value` como parâmetro:
+
+```js
+(value) => !(list.indexOf(value) === -1)
+```
+
+Por isso usamos o módulo dessa forma, primeiramente passando o `list` e recebendo uma função para depois usar essa função passando o `value`:
+
+```js
+const isIn = require('./createIsIn')(list)
+
+const validated = isIn(value);
+if (validated) return true;
+```
+
+Mas não vamos parar por aí, vamos dar aquela refatorada de sempre. :p
+
+Analisando nosso código conseguimos perceber que se o `validated` for `true` ele irá retornar `true` e se for `false` ele não entra no `if` e vai direto para o `return false`.
+
+Sabendo disso refatoramos o código assim:
+
+```js
+module.exports = (value, list) => {
+
+  const isIn = require('./createIsIn')(list)
+
+  return isIn(value);
+};
+```
+
+**Certo?**
+
+Então olha o que ainda podemos fazer com esse maravilhoso JavaScript:
+
+```js
+module.exports = (value, list) => {
+  return require('./createIsIn')(list)(value);
+};
+```
+
+**Loco não?**
+
+Pois é aprenderemos mais sobre [Currying](https://github.com/Webschool-io/workshop-js-funcional-free#currying) no módulo sobre JS Funcional logo após o módulo de ES6!
+
+> Só faltou só fazermos o **teste mais básico desse módulo!**
+
+**Qual seria?**
+
+Pense comigo, se o módulo testa se um valor está no *array* então o que ele deve testar antes de verificar se o valor existe no *array*?
+
+**Duas coisas:**
+
+- não é vazio?
+- é *array*?
 
 Vamos ver então como usamos esse módulo:
 
@@ -974,8 +1066,8 @@ const list = ['suissa', 'itacir'];
 const valueTRUE = 'suissa';
 const valueFALSE = 'pitchulo';
 
-assert.equal(true, require('./isEnum')(valueTRUE, list));
-assert.equal(false, require('./isEnum')(valueFALSE, list));
+assert.equal(true, require('./isInArray')(valueTRUE, list));
+assert.equal(false, require('./isInArray')(valueFALSE, list));
 ```
 
 Agora levando para o nosso conceito mais genérico precisamos nos ater ao segundo parâmetro `list` e pensar então como podemos passar esses valores na forma que aprendemos.
@@ -996,7 +1088,7 @@ const describes = [
   , values: [null, undefined, 1, true, {}, ()=>{}]
   }
 ];
-require('./testModuleCreate')('isEnum', describes);
+require('./testModuleCreate')('isInArray', describes);
 ```
 
 Perceba que estou usando um módulo diferente, o `testModuleCreate`, pois precisaremos modificar o nosso `testModule` e para não dar merda preferi criar um novo.
