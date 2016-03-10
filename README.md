@@ -201,7 +201,7 @@ module.exports = (value) => {
   // validação se é Number
   // validação se maior que 0
   isNumber = require('./isNumber')(value)
-  if(!isEmpty && isNumber) {
+  if(isNumber) {
      if(value > 0) return true;
   }
   return false;
