@@ -2346,5 +2346,27 @@ Perceba que as funções de `testQuark` possuem interfaces diferentes remetendo 
 
 **Estou citando alguns princípios de S.O.L.I.D. mesmo não estando usando OO clássica, porém estou adaptando-os.** Caso você não concorde eu agradeceria se você me explicasse o porquê.
 
+Mas eu ainda não estou satisfeito, podemos refatorar ainda mais!
 
+> O que você acha que podemos fazer com esse pedaço de código??
+
+```js
+const testTypes = require('./config/testTypesFactory');
+let testQuark = null;
+
+let findTest = (element) => {
+  let regex = new RegExp(element, 'i');
+  if(!!testName.match(regex)){
+    testQuark = require('./config/testQuark'+element);
+  }
+};
+
+testTypes.forEach(findTest);
+```
+
+![Acerto mizeravi](http://geradormemes.com/media/created/bd1s1x.jpg)
+
+```js
+let testQuark = require('./config/testFactory')(testName);
+```
 

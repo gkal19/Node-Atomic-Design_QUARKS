@@ -4,17 +4,7 @@ const expect = require('chai').expect;
 
 module.exports = (testName, describes) => {
 
-  const testTypes = require('./config/testTypesFactory');
-  let testQuark = null;
-
-  let findTest = (element) => {
-    let regex = new RegExp(element, 'i');
-    if(!!testName.match(regex)){
-      testQuark = require('./config/testQuark'+element);
-    }
-  };
-
-  testTypes.forEach(findTest);
+  let testQuark = require('./config/testFactory')(testName);
 
   let test = (values, valueToTest) => {
     if(isQuarkTo) testQuark(values, valueToTest, testName, describes);
