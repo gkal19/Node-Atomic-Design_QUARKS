@@ -2366,7 +2366,62 @@ testTypes.forEach(findTest);
 
 ![Acerto mizeravi](http://geradormemes.com/media/created/bd1s1x.jpg)
 
+> Refatorar!
+
+Então vamos refatorar o código acima para esse:
+
 ```js
 let testQuark = require('./config/testFactory')(testName);
 ```
+
+**Sim você não está enganado! É só isso mesmo.**
+
+Vamos criar um *Factory* para nossos testes de *Quarks*:
+
+```js
+module.exports = (testName) => {
+  let test = null;
+  let findTest = (element) => {
+    let regex = new RegExp(element, 'i');
+    if(!!testName.match(regex)){
+      test = require('./testQuark'+element);
+    }
+  };
+
+  require('./testTypesFactory').forEach(findTest);
+  return test;
+}
+```
+
+Lembre como está nosso *array* de tipos de testes:
+
+```js
+['Is', 'IsIn', 'To']
+```
+
+Iremos seguir **SEMPRE** esse padrão do mais básico, `Is`, ao mais complexo.
+
+Agora eu lhe pergunto:
+
+> Analisando esse código você consegue perceber o porquê?
+
+Lembra do resultado do `match` caso seja *Quark isIn*?
+
+```js
+[ 'is', index: 0, input: 'isInArray' ]
+[ 'isIn', index: 0, input: 'isInArray' ]
+null
+```
+
+Notou que se tivermos um teste `isIn` ele também da o `match` com `is`?
+
+Porém sabemos que se vier o `isIn` é ele que queremos, por isso fizemos assim no *Factory*:
+
+```js
+if(!!testName.match(regex)){
+  test = require('./testQuark'+element);
+}
+```
+
+Dessa forma **sempre** retornaremos o último teste válido.
 
