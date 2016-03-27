@@ -982,7 +982,7 @@ Ele é basicamente uma lista de valores onde para um valor ser aceito ele **prec
 
 Ou seja, para testarmos essa funcionalidade precisamos passar o valor a ser testado e a lista de valores aceitáveis, correto?
 
-Por isso estamos o `createIsIn` que irá receber essa lista, no caso o *array* e irá retornar um valor **booleano** caso o `value` exista em alguma posição de `list`.
+Por isso testamos o `createIsIn` que irá receber essa lista, no caso o *array* e irá retornar um valor **booleano** caso o `value` exista em alguma posição de `list`.
 
 Como a função `indexOf` irá retornar a posição em que encontrou o `value` e caso não encontre ele retorna `-1`, por isso testamos se o resultado é igual a `-1`, pois se ele não achar e for igual a `-1` irá resultar em verdadeiro certo?
 
