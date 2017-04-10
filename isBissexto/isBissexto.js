@@ -1,6 +1,5 @@
-'use strict';
 // Criado por @gkal19
-module.exports = function(year) {
+export default year => {
 	year = year || new Date();
 	year = year instanceof Date ? year.getFullYear() : year;
 	/* Se o ano for divisível por 4 
