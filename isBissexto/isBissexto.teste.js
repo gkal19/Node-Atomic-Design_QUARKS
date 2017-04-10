@@ -1,9 +1,9 @@
-'use strict';
 // Criado por @gkal19
-var assert = require('assert');
-var leapYear = require('./');
+import assert from 'assert';
 
-it('Vamos verificar se o ano é um ano bissexto', function () {
+import leapYear from './';
+
+it('Vamos verificar se o ano é um ano bissexto', () => {
 	assert(!leapYear(2014));
 	assert(leapYear(2016));
 	assert(leapYear(new Date(2016, 0)));
